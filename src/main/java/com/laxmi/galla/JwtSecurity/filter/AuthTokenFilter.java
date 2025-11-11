@@ -1,6 +1,6 @@
 package com.laxmi.galla.JwtSecurity.filter;
 
-import Niggle.Nandu.Jwt.Security.JwtSecurity.security.JwtUtils;
+import com.laxmi.galla.JwtSecurity.security.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
