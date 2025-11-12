@@ -1,7 +1,7 @@
 package com.laxmi.galla.JwtSecurity.service;
 
-import Niggle.Nandu.Jwt.Security.JwtSecurity.model.AuthUserEntity;
-import Niggle.Nandu.Jwt.Security.JwtSecurity.repository.UserRepository;
+import com.laxmi.galla.JwtSecurity.model.AuthUserEntity;
+import com.laxmi.galla.JwtSecurity.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -27,7 +27,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
         List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(roleEntity -> new SimpleGrantedAuthority(roleEntity.getRole().name()))
+                .map(roleEntity -> new SimpleGrantedAuthority("ROLE_" + roleEntity.getRole().name()))
                 .collect(Collectors.toList());
 
         return new User(user.getUsername(), user.getPassword(), authorities);

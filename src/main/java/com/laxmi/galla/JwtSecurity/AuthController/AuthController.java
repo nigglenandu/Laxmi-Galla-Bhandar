@@ -1,28 +1,22 @@
 package com.laxmi.galla.JwtSecurity.AuthController;
 
-import Niggle.Nandu.Jwt.Security.JwtSecurity.model.AuthUserEntity;
-import Niggle.Nandu.Jwt.Security.JwtSecurity.model.Role;
-import Niggle.Nandu.Jwt.Security.JwtSecurity.model.RoleEntity;
-import Niggle.Nandu.Jwt.Security.JwtSecurity.payload.JwtResponse;
-import Niggle.Nandu.Jwt.Security.JwtSecurity.payload.LoginRequest;
-import Niggle.Nandu.Jwt.Security.JwtSecurity.payload.SignupRequest;
-import Niggle.Nandu.Jwt.Security.JwtSecurity.repository.RoleRepository;
-import Niggle.Nandu.Jwt.Security.JwtSecurity.repository.UserRepository;
-import Niggle.Nandu.Jwt.Security.JwtSecurity.security.JwtUtils;
+import com.laxmi.galla.JwtSecurity.model.AuthUserEntity;
+import com.laxmi.galla.JwtSecurity.model.Role;
+import com.laxmi.galla.JwtSecurity.model.RoleEntity;
+import com.laxmi.galla.JwtSecurity.payload.JwtResponse;
+import com.laxmi.galla.JwtSecurity.payload.LoginRequest;
+import com.laxmi.galla.JwtSecurity.payload.MessageResponse;
+import com.laxmi.galla.JwtSecurity.payload.SignupRequest;
+import com.laxmi.galla.JwtSecurity.repository.RoleRepository;
+import com.laxmi.galla.JwtSecurity.repository.UserRepository;
+import com.laxmi.galla.JwtSecurity.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,52 +24,50 @@ import java.util.stream.Collectors;
 @RequestMapping("api/auth")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtils jwtUtils;
+    private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
-        this.authenticationManager = authenticationManager;
+    public AuthController(UserRepository userRepository,
+                          RoleRepository roleRepository,
+                          PasswordEncoder passwordEncoder,
+                          AuthService authService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtUtils = jwtUtils;
+        this.authService = authService;
     }
 
     @PostMapping("login")
-    public ResponseEntity<?> authenticate(@RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
+        var loginResult = authService.login(loginRequest, request);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // Set cookies
+        response.addHeader("Set-Cookie", authService.createAccessCookie(loginResult.accessToken()).toString());
+        response.addHeader("Set-Cookie", authService.createRefreshCookie(loginResult.refreshToken()).toString());
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        System.out.println(userDetails);
+        AuthUserEntity user = userRepository.findByUsername(loginResult.userDetails().getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String jwt = jwtUtils.generateTokenFromUsername(userDetails);
-        System.out.println(jwt);
+        Set<String> roles = user.getRoles().stream()
+                .map(r -> r.getRole().name())
+                .collect(Collectors.toSet());
 
-        Optional<AuthUserEntity> userEntityOptional = userRepository.findByUsername(userDetails.getUsername());
-        if (userEntityOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("Error: User not found!");
-        }
-
-        AuthUserEntity user = userEntityOptional.get();
-
-        List<String> roles = user.getRoles().stream()
-                .map(roleEntity -> roleEntity.getRole().name())
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(new JwtResponse(jwt, roles, user.getUserId(), user.getUsername(), user.getEmail()));
-
+        return ResponseEntity.ok(new JwtResponse(
+                loginResult.accessToken(),
+                loginResult.refreshToken(),
+                roles.stream().toList(),
+                user.getUserId(),
+                user.getUsername(),
+                user.getEmail()
+        ));
     }
 
     @PostMapping("signup")
-    public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
         if(userRepository.findByUsername(signupRequest.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
         AuthUserEntity user = new AuthUserEntity();
@@ -83,23 +75,55 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
         user.setEmail(signupRequest.getEmail());
 
-        // Fetch roles from signupRequest and convert to Set
         Set<RoleEntity> roles = signupRequest.getRoles().stream()
                 .map(roleName -> roleRepository.findByRole(Role.valueOf(roleName))
                         .orElseThrow(() -> new RuntimeException("Error: Role " + roleName + " not found!"))
-                )
-                .collect(Collectors.toSet());
+                ).collect(Collectors.toSet());
 
         user.setRoles(roles);
-
         userRepository.save(user);
-        return ResponseEntity.ok("User registered successfully!");
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-
     @PostMapping("logout")
-    public ResponseEntity<?> logoutUser() {
-        SecurityContextHolder.clearContext();
-        return ResponseEntity.ok("User logged out successfully!");
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        authService.logout(request);
+
+        response.addHeader("Set-Cookie", authService.clearAccessCookie().toString());
+        response.addHeader("Set-Cookie", authService.clearRefreshCookie().toString());
+
+        return ResponseEntity.ok(new MessageResponse("Logged out successfully"));
+    }
+
+    @PostMapping("refresh")
+    public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
+        AuthService.RefreshResult refreshResult = authService.refresh(request);
+
+        if (refreshResult == null) {
+            return ResponseEntity.status(401)
+                    .body(new MessageResponse("Invalid or expired refresh token"));
+        }
+
+        ResponseCookie accessCookie = authService.createAccessCookie(refreshResult.accessToken());
+        ResponseCookie refreshCookie = authService.createRefreshCookie(refreshResult.refreshToken());
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+
+        AuthUserEntity user = userRepository.findByUsername(refreshResult.userDetails().getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Set<String> roles = user.getRoles().stream()
+                .map(r -> r.getRole().name())
+                .collect(Collectors.toSet());
+
+        return ResponseEntity.ok(new JwtResponse(
+                refreshResult.accessToken(),
+                refreshResult.refreshToken(),
+                roles.stream().toList(),
+                user.getUserId(),
+                user.getUsername(),
+                user.getEmail()
+        ));
     }
 }

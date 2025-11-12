@@ -1,7 +1,9 @@
 package com.laxmi.galla.JwtSecurity.SecurityConfig;
 
-import Niggle.Nandu.Jwt.Security.JwtSecurity.Exception.AuthEntryPointJwt;
-import Niggle.Nandu.Jwt.Security.JwtSecurity.filter.AuthTokenFilter;
+import com.laxmi.galla.JwtSecurity.Exception.AuthEntryPointJwt;
+import com.laxmi.galla.JwtSecurity.filter.AuthTokenFilter;
+import org.springframework.web.filter.CorsFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +16,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -22,6 +28,9 @@ public class SecurityConfiguration {
     private final UserDetailsService userDetailsService;
     private final AuthEntryPointJwt unauthorizedHandler;
     private final AuthTokenFilter authTokenFilter;
+
+    @Value("${app.cors.allowed-origins:*}")
+    private String[] allowedOrigins;
 
     public SecurityConfiguration(AuthTokenFilter authTokenFilter,
                                  UserDetailsService userDetailsService,
@@ -40,11 +49,6 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/users/register").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-//                        Optionally allow vendor/delivery/support paths
-//                        .requestMatchers("/api/vendor/**").hasRole("VENDOR")
-//                        .requestMatchers("/api/delivery/**").hasRole("DELIVERY")
-//                        .requestMatchers("/api/support/**").hasRole("SUPPORT")
                         .anyRequest().authenticated()
                 )
 
@@ -71,4 +75,15 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(Arrays.asList(allowedOrigins));
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
 }
