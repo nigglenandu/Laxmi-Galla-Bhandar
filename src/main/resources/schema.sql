@@ -46,6 +46,16 @@
         primary key (id)
     ) engine=InnoDB;
 
+    create table refresh_tokens (
+        expiry_date datetime(6),
+        id bigint not null auto_increment,
+        user_id bigint not null,
+        token_hash varchar(512) not null,
+        id_address varchar(255),
+        user_agent varchar(255),
+        primary key (id)
+    ) engine=InnoDB;
+
     create table report (
         balance decimal(19,4),
         end_date date,
@@ -58,6 +68,12 @@
         customer_id bigint,
         id bigint not null auto_increment,
         update_at datetime(6),
+        primary key (id)
+    ) engine=InnoDB;
+
+    create table roles (
+        id bigint not null auto_increment,
+        role enum ('ADMIN','AUDITOR','SUPERADMIN') not null,
         primary key (id)
     ) engine=InnoDB;
 
@@ -79,6 +95,29 @@
         primary key (id)
     ) engine=InnoDB;
 
+    create table user_roles (
+        role_id bigint not null,
+        user_id bigint not null,
+        primary key (role_id, user_id)
+    ) engine=InnoDB;
+
+    create table users (
+        is_email_verified bit not null,
+        user_id bigint not null auto_increment,
+        email varchar(255) not null,
+        password varchar(255) not null,
+        username varchar(255) not null,
+        primary key (user_id)
+    ) engine=InnoDB;
+
+    create table verification_token (
+        expiry_date datetime(6) not null,
+        id bigint not null auto_increment,
+        user_id bigint not null,
+        token varchar(255) not null,
+        primary key (id)
+    ) engine=InnoDB;
+
     alter table category 
        add constraint UK46ccwnsi9409t36lurvtyljak unique (name);
 
@@ -88,11 +127,26 @@
     create index idx_customer_contact 
        on customer_info (contact);
 
+    alter table roles 
+       add constraint UKg50w4r0ru3g9uf6i6fr4kpro8 unique (role);
+
     create index idx_transaction_customer 
        on transaction_info (customer_id);
 
     create index idx_transaction_date 
-       on transaction_info (transaction_data);
+       on transaction_info (transaction_date);
+
+    alter table users 
+       add constraint UKr43af9ap4edm43mmtq01oddj6 unique (username);
+
+    alter table users 
+       add constraint UK6dotkott2kjsp8vw4d0m25fb7 unique (email);
+
+    alter table verification_token 
+       add constraint UKq6jibbenp7o9v6tq178xg88hg unique (user_id);
+
+    alter table verification_token 
+       add constraint UKp678btf3r9yu6u8aevyb4ff0m unique (token);
 
     alter table customer_category 
        add constraint FKd3y8stblsin7j38kx8xt4v8qf 
@@ -103,6 +157,11 @@
        add constraint FKa8r7yjsb2y5330fsgabhgfvmw 
        foreign key (customer_id) 
        references customer_info (id);
+
+    alter table refresh_tokens 
+       add constraint FK1lih5y2npsf8u5o3vhdb9y0os 
+       foreign key (user_id) 
+       references users (user_id);
 
     alter table report 
        add constraint FK6cpsxw6txn4u2hf9rihmg9l0u 
@@ -128,3 +187,18 @@
        add constraint FKqe9g3x2flj4gr621u7nvcniwg 
        foreign key (unit_id) 
        references custom_unit (id);
+
+    alter table user_roles 
+       add constraint FKh8ciramu9cc9q3qcqiv4ue8a6 
+       foreign key (role_id) 
+       references roles (id);
+
+    alter table user_roles 
+       add constraint FKhfh9dx7w3ubf1co1vdev94g3f 
+       foreign key (user_id) 
+       references users (user_id);
+
+    alter table verification_token 
+       add constraint FK3asw9wnv76uxu3kr1ekq4i1ld 
+       foreign key (user_id) 
+       references users (user_id);

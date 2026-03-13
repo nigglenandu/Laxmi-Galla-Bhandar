@@ -2,6 +2,7 @@ package com.laxmi.galla.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.laxmi.galla.entity.enums.PurchaseOrSale;
+import core.model.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "transaction_info", indexes = {
         @Index(name = "idx_transaction_customer", columnList = "customer_id"),
-        @Index(name = "idx_transaction_date", columnList = "transaction_data")
+        @Index(name = "idx_transaction_date", columnList = "transaction_date")
 })
 @SQLDelete(sql = "UPDATE transaction_info SET is_deleted = true WHERE id = ?")
 @Where(clause = "is_deleted = false")
@@ -23,12 +24,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(callSuper = true)
-public class TransactionInfo extends BaseEntity{
+public class TransactionInfo extends AuditableEntity<String> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     @JsonBackReference
-    private CustomerInfo customer;
+    private CustomerEntity customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)

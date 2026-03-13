@@ -1,6 +1,7 @@
 package com.laxmi.galla.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import core.model.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -15,11 +16,11 @@ import java.util.Set;
 @Where(clause = "is_deleted = false")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @ToString(callSuper = true)
-public class Company extends BaseEntity{
+public class Company extends AuditableEntity<String> {
 
     @Column(nullable = false)
     private String name;

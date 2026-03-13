@@ -1,5 +1,6 @@
 package com.laxmi.galla.entity;
 
+import core.model.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -18,7 +19,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(callSuper = true)
-public class Report extends BaseEntity{
+public class Report extends AuditableEntity<String> {
 
     @Column(name = "start_date")
     private LocalDate startDate;
@@ -37,7 +38,7 @@ public class Report extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
-    private CustomerInfo customer;
+    private CustomerEntity customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")

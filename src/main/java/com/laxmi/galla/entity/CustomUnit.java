@@ -1,5 +1,6 @@
 package com.laxmi.galla.entity;
 
+import core.model.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -17,7 +18,7 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(callSuper = true)
-public class CustomUnit extends BaseEntity{
+public class CustomUnit extends AuditableEntity<String> {
 
     @Column(name = "unit_name", nullable = false, unique = true)
     private String unitName;
