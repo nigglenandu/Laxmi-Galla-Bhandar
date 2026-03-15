@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 //@PasswordMatch
 @Schema(description = "Change password while authenticated")
 public record ChangePasswordRequest(
-    @NotBlank String oldPassword,
+    @NotBlank String currentPassword,
     @NotBlank
 //    @ValidPassword
     String newPassword,
