@@ -17,10 +17,11 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PasswordResetService {
+public class PasswordResetService implements IPasswordResetService {
     private final UserRepository userRepository;
     private final OtpService otpService;
     private final IEmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     public void sendForgotPasswordOtp(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.email())
@@ -48,7 +49,7 @@ public class PasswordResetService {
         }
 
         // Encode and update password
-        user.setPassword(HashUtils.sha256Base64(request.newPassword()));
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
 
         log.info("Password reset successfully for email {}", user.getEmail());
@@ -59,27 +60,19 @@ public class PasswordResetService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "User not found"));
 
-        // Verify current password
-        String currentPasswordHash = HashUtils.sha256Base64(request.currentPassword());
-
-        if (!currentPasswordHash.equals(user.getPassword())) {
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new BusinessException("INVALID_CURRENT_PASSWORD", "Current password is incorrect");
         }
 
-        // Validate new password confirmation
         if (!request.newPassword().equals(request.confirmPassword())) {
             throw new BusinessException("PASSWORD_MISMATCH", "New password and confirm password do not match");
         }
 
-        // Prevent same password reuse
-        String newPasswordHash = HashUtils.sha256Base64(request.newPassword());
-
-        if (newPasswordHash.equals(user.getPassword())) {
+        if (passwordEncoder.matches(request.newPassword(), user.getPassword())) {
             throw new BusinessException("PASSWORD_SAME", "New password cannot be the same as current password");
         }
 
-        // Update password
-        user.setPassword(newPasswordHash);
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
 
         log.info("Password changed successfully | email={}", email);

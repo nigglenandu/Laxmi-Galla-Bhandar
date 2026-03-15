@@ -6,6 +6,7 @@ import com.laxmi.galla.security.dto.response.AuthResponse;
 import com.laxmi.galla.core.dto.response.ApiResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.Map;
@@ -19,5 +20,5 @@ public interface IAuthService {
                                   HttpServletResponse response);
 
     ApiResult<Void> logout(HttpServletRequest request,
-                           HttpServletResponse response,  @AuthenticationPrincipal String subject);
+                           HttpServletResponse response, Authentication auth);
 }
