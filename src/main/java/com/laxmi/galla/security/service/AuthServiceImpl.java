@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -49,19 +50,19 @@ public class AuthServiceImpl implements IAuthService {
     @Value("${platform.security.jwt.refresh-token-expiration-ms}")
     private long refreshTokenExpirationMs;
 
-    /**
-     * Signup – simple example, stores user and returns minimal info.
-     */
     public ApiResult<Map<String, String>> signup(SignupRequest signupRequest) {
         if (userRepository.existsByEmail(signupRequest.email())) {
             throw new BusinessException("Email is already taken", "EMAIL_TAKEN");
         }
 
+        // Encode password securely using PasswordEncoder
+        String encodedPassword = passwordEncoder.encode(signupRequest.password());
+
         User user = User.builder()
                 .firstName(signupRequest.firstName())
                 .lastName(signupRequest.lastName())
                 .email(signupRequest.email())
-                .password(HashUtils.sha256Base64(signupRequest.password()))
+                .password(encodedPassword) // <-- updated here
                 .active(true)
                 .emailVerified(false)
                 .roles(new HashSet<>())
@@ -113,25 +114,18 @@ public class AuthServiceImpl implements IAuthService {
                 .build();
     }
 
-    /**
-     * Login – validates credentials, issues JWTs, sets cookies.
-     */
     @Override
     public ApiResult<AuthResponse> login(LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
 
-        Optional<User> userOtp = userRepository.findByEmail(loginRequest.email());
+        // Fetch user by email
+        User user = userRepository.findByEmail(loginRequest.email())
+                .orElseThrow(() -> new BusinessException(
+                        "Invalid email or password",
+                        "INVALID_CREDENTIALS",
+                        HttpStatus.UNAUTHORIZED
+                ));
 
-                if(userOtp.isEmpty() || !passwordEncoder.matches(loginRequest.password(), userOtp.get().getPassword())) {
-                    throw new BusinessException(
-                            "Invalid email or password",
-                            "INVALID_CREDENTIALS",
-                            HttpStatus.UNAUTHORIZED
-                    );
-                }
-                User user = userOtp.get(); 
-
-        // ── FIX: Use proper password encoder (BCrypt, Argon2, etc.)
-        // Assuming you have PasswordEncoder injected as field: private final PasswordEncoder passwordEncoder;
+        // Verify password
         if (!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
             throw new BusinessException(
                     "Invalid email or password",
@@ -140,7 +134,7 @@ public class AuthServiceImpl implements IAuthService {
             );
         }
 
-        // Claims
+        // Claims for JWT
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", user.getRoles());
         claims.put("fn", user.getFirstName());
@@ -150,13 +144,13 @@ public class AuthServiceImpl implements IAuthService {
         String ip = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
         List<String> roleNames = user.getRoles().stream()
-                .map(roleEntity -> roleEntity.getRole().name())   // → "USER", "ADMIN", ...
-                .sorted()                                         // optional: nice for consistency
+                .map(roleEntity -> roleEntity.getRole().name())
+                .sorted()
                 .toList();
 
-        // No fingerprint anymore – assuming signature is now only 4 params
+        // Generate JWT tokens
         var tokenPair = tokenService.generateTokens(
-                user.getEmail(),    // subject
+                user.getEmail(),
                 claims,
                 ip,
                 userAgent,
@@ -169,14 +163,7 @@ public class AuthServiceImpl implements IAuthService {
                 tokenPair.refreshToken()
         );
 
-        // ── Expiry calculation (inject these values!)
-        // Example: use @Value in this class or parent
-        // @Value("${jwt.access.expiration-ms:900000}")   // 15 min default
-        // private long accessTokenExpirationMs;
-        //
-        // @Value("${jwt.refresh.expiration-ms:604800000}") // 7 days default
-        // private long refreshTokenExpirationMs;
-
+        // Calculate expiration
         Instant now = Instant.now();
         long expiresInSeconds = accessTokenExpirationMs / 1000;
         Instant expiresAt = now.plusMillis(accessTokenExpirationMs);
@@ -196,16 +183,14 @@ public class AuthServiceImpl implements IAuthService {
 
         return ApiResult.ok(authResponse);
     }
+
     /**
      * Logout – clears cookies and optionally revokes refresh tokens.
      */
-    @Override
     public ApiResult<Void> logout(HttpServletRequest request,
                                   HttpServletResponse response,
-                                  @AuthenticationPrincipal String subject) {  // or UserDetails / Jwt principal
-
-        if (!StringUtils.hasText(subject)) {
-            // No authenticated user → just clear cookies and return
+                                  Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
             tokenService.clearTokens(response);
             return ApiResult.<Void>builder()
                     .success(true)
@@ -214,15 +199,12 @@ public class AuthServiceImpl implements IAuthService {
                     .build();
         }
 
-        // Revoke ALL refresh tokens for this user (logs out from all devices)
-        tokenService.revokeAllForSubject(subject);
-
-        // Clear access & refresh cookies
+        String email = auth.getName();
+        tokenService.revokeAllForSubject(email);
         tokenService.clearTokens(response);
 
-        // Optional: log for audit
-        log.info("User logged out successfully | subject={} | ip={} | ua={}",
-                subject,
+        log.info("User logged out successfully | email={} | ip={} | ua={}",
+                email,
                 request.getRemoteAddr(),
                 request.getHeader("User-Agent"));
 
