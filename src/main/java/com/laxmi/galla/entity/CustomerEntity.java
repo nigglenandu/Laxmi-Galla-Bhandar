@@ -1,7 +1,6 @@
 package com.laxmi.galla.entity;
 
-import core.model.AuditableEntity;
-import core.model.BaseEntity;
+import com.laxmi.galla.core.model.AuditableEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;

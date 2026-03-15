@@ -1,6 +1,6 @@
 package com.laxmi.galla.entity;
 
-import core.model.AuditableEntity;
+import com.laxmi.galla.core.model.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -9,8 +9,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "category")
