@@ -40,6 +40,7 @@ public class AuthServiceImpl implements IAuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final OtpService otpService;
+    private final IEmailService emailService;
 
 
     @Value("${platform.security.jwt.access-token-expiration-ms}")
@@ -99,10 +100,10 @@ public class AuthServiceImpl implements IAuthService {
         user.setRoles(roles);
         userRepository.save(user);
 
-        otpService.generateOtp(user.getEmail(), OtpPurpose.SIGNUP_VERIFICATION);
-        emailService.
+        String otp = otpService.generateOtp(user.getEmail(), OtpPurpose.SIGNUP_VERIFICATION);
+        emailService.sendOtp(user.getEmail(), otp);
+
         Map<String, String> result = Map.of(
-                "message", "Signup successful",
                 "userId", user.getId().toString()
         );
 
@@ -225,10 +226,6 @@ public class AuthServiceImpl implements IAuthService {
                 request.getRemoteAddr(),
                 request.getHeader("User-Agent"));
 
-        return ApiResult.<Void>builder()
-                .success(true)
-                .message("Logout successful")
-                .httpStatus(HttpStatus.OK)
-                .build();
+        return ApiResult.ok(null, "Logout successful");
     }
 }
