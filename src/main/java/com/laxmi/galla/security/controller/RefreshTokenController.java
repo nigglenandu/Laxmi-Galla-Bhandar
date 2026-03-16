@@ -136,4 +136,24 @@ public class RefreshTokenController {
                     .toResponseEntity();
         }
     }
+
+    @PostMapping("/revoke")
+    public ResponseEntity<ApiResult<Void>> revokeToken(
+            HttpServletRequest request,
+            HttpServletResponse response) {
+
+        String refreshToken = authService.extractRefreshToken(request);
+
+        if (!StringUtils.hasText(refreshToken)) {
+            return ApiResult.badRequest(
+                    "Refresh token required",
+                    "REFRESH_TOKEN_REQUIRED"
+            ).toResponseEntity();
+        }
+
+        tokenService.revokeRefreshToken(refreshToken);
+        tokenService.clearTokens(response);
+
+        return ApiResult.noContent().toResponseEntity();
+    }
 }
