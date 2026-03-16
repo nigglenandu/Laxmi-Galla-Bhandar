@@ -21,4 +21,6 @@ public interface IAuthService {
 
     ApiResult<Void> logout(HttpServletRequest request,
                            HttpServletResponse response, Authentication auth);
+
+    String extractRefreshToken(HttpServletRequest request);
 }

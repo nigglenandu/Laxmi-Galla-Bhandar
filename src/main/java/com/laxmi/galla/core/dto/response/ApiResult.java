@@ -99,8 +99,22 @@ public class ApiResult<T> implements Serializable {
         return error(HttpStatus.BAD_REQUEST, message, errorCode, null, null, null, null);
     }
 
+    public static <T> ApiResult<T> badRequestT(String message, String errorCode) {
+        return errorT(HttpStatus.BAD_REQUEST, message, errorCode, null, null, null, null);
+    }
+
     public static ApiResult<Void> validationError(Map<String, String> fieldErrors) {
         return ApiResult.<Void>builder()
+                .success(false)
+                .httpStatus(HttpStatus.BAD_REQUEST)
+                .message("Validation failed")
+                .fieldErrors(fieldErrors)
+                .errorCode("VALIDATION_FAILED")
+                .build();
+    }
+
+    public static <T> ApiResult<T> validationErrorT(Map<String, String> fieldErrors) {
+        return ApiResult.<T>builder()
                 .success(false)
                 .httpStatus(HttpStatus.BAD_REQUEST)
                 .message("Validation failed")
@@ -113,8 +127,16 @@ public class ApiResult<T> implements Serializable {
         return error(HttpStatus.NOT_FOUND, message, errorCode, null, null, null, null);
     }
 
+    public static <T> ApiResult<T> notFoundT(String message, String errorCode) {
+        return errorT(HttpStatus.NOT_FOUND, message, errorCode, null, null, null, null);
+    }
+
     public static ApiResult<Void> unauthorized(String message, String errorCode) {
         return error(HttpStatus.UNAUTHORIZED, message, errorCode, null, null, null, null);
+    }
+
+    public static <T> ApiResult<T> unauthorizedT(String message, String errorCode) {
+        return errorT(HttpStatus.UNAUTHORIZED, message, errorCode, null, null, null, null);
     }
 
     public static ApiResult<Void> error(HttpStatus status, String message, String errorCode,
@@ -132,6 +154,20 @@ public class ApiResult<T> implements Serializable {
                 .build();
     }
 
+    public static <T> ApiResult<T> errorT(HttpStatus status, String message, String errorCode,
+                                          Map<String, Object> metadata, Map<String, String> fieldErrors,
+                                          String path, String detail) {
+        return ApiResult.<T>builder()
+                .success(false)
+                .httpStatus(status)
+                .message(message != null ? message : status.getReasonPhrase())
+                .errorCode(errorCode)
+                .metadata(metadata)
+                .fieldErrors(fieldErrors)
+                .path(path)
+                .detail(detail)
+                .build();
+    }
     // Convenience method to add path
     public ApiResult<T> withPath(String path) {
         return this.toBuilder().path(path).build();

@@ -14,11 +14,13 @@ import com.laxmi.galla.core.exception.BusinessException;
 import com.laxmi.galla.core.security.repository.RoleRepository;
 import com.laxmi.galla.core.security.service.ITokenService;
 import com.laxmi.galla.core.security.utils.HashUtils;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -134,9 +136,19 @@ public class AuthServiceImpl implements IAuthService {
             );
         }
 
+        if (!user.isEmailVerified()) {
+            throw new BusinessException(
+                    "Email not verified",
+                    "EMAIL_NOT_VERIFIED",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
         // Claims for JWT
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", user.getRoles());
+        claims.put("roles", user.getRoles().stream()
+                .map(role -> role.getRole().name())
+                .toList());
         claims.put("fn", user.getFirstName());
         claims.put("ln", user.getLastName());
         claims.put("uid", user.getId());
@@ -184,30 +196,51 @@ public class AuthServiceImpl implements IAuthService {
         return ApiResult.ok(authResponse);
     }
 
-    /**
-     * Logout – clears cookies and optionally revokes refresh tokens.
-     */
     public ApiResult<Void> logout(HttpServletRequest request,
                                   HttpServletResponse response,
                                   Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) {
-            tokenService.clearTokens(response);
-            return ApiResult.<Void>builder()
-                    .success(true)
-                    .message("Already logged out")
-                    .httpStatus(HttpStatus.OK)
-                    .build();
+
+        String refreshToken = extractRefreshToken(request);
+
+        if (StringUtils.hasText(refreshToken)) {
+            tokenService.revokeRefreshToken(refreshToken);
         }
 
-        String email = auth.getName();
-        tokenService.revokeAllForSubject(email);
         tokenService.clearTokens(response);
 
-        log.info("User logged out successfully | email={} | ip={} | ua={}",
-                email,
-                request.getRemoteAddr(),
-                request.getHeader("User-Agent"));
+        if (auth != null && auth.isAuthenticated()) {
+            log.info("User logged out | user={} | ip={} | ua={}",
+                    auth.getName(),
+                    request.getRemoteAddr(),
+                    request.getHeader("User-Agent"));
+        }
 
         return ApiResult.ok(null, "Logout successful");
+    }
+
+    public String extractRefreshToken(HttpServletRequest request) {
+        // 1. Prefer custom header (mobile, Postman, etc.)
+        String token = request.getHeader("X-Refresh-Token");
+        if (StringUtils.hasText(token)) {
+            return token.trim();
+        }
+
+        // 2. Fallback to cookie (web browsers)
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refresh_token".equals(cookie.getName()) && StringUtils.hasText(cookie.getValue())) {
+                    return cookie.getValue().trim();
+                }
+            }
+        }
+
+        // 3. Optional: future-proof — check Authorization header (Bearer style)
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7).trim();
+        }
+
+        return null;
     }
 }
