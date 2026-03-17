@@ -332,6 +332,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .toResponseEntity();
     }
 
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResult<Void>> handleDataIntegrityViolation(
+            org.springframework.dao.DataIntegrityViolationException ex, WebRequest request) {
+
+        log.warn("Data integrity violation | traceId={} | path={}", getTraceId(), getRequestUri(request), ex);
+
+        // Customize message (you can extract specific duplicate info if needed)
+        String message = "Duplicate entry – please check your input";
+
+        return ApiResult.<Void>builder()
+                .success(false)
+                .httpStatus(HttpStatus.CONFLICT)
+                .errorCode("DUPLICATE_ENTRY")
+                .message(message)
+                .path(getRequestUri(request))
+                .traceId(getTraceId())
+                .timestamp(Instant.now())
+                .detail(isDevMode() ? ex.getMostSpecificCause().getMessage() : null) // optional
+                .build()
+                .toResponseEntity();
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResult<Void>> handleAll(Exception ex, WebRequest request) {
         String instanceId = UUID.randomUUID().toString().substring(0, 12);

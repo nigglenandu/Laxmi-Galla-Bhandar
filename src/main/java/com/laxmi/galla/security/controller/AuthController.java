@@ -5,14 +5,18 @@ import com.laxmi.galla.security.dto.request.LoginRequest;
 import com.laxmi.galla.security.dto.request.OtpVerifyRequest;
 import com.laxmi.galla.security.dto.request.SignupRequest;
 import com.laxmi.galla.security.dto.response.AuthResponse;
+import com.laxmi.galla.security.dto.response.OtpVerificationResult;
 import com.laxmi.galla.security.enums.OtpPurpose;
 import com.laxmi.galla.security.service.IAuthService;
 import com.laxmi.galla.security.service.OtpService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.slf4j.MDC;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +26,14 @@ import java.util.Map;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Auth Controller", description = "APIs for user authentication and registration")
 public class AuthController {
 
     private final IAuthService authService;
     private final OtpService otpService;
 
     @PostMapping("/signup")
+    @Operation(summary = "User Signup", description = "Registers a new user. Sends OTP if email is not verified.")
     public ResponseEntity<ApiResult<Map<String, String>>> signup(
             @Valid @RequestBody SignupRequest signupRequest) {
 
@@ -38,29 +44,32 @@ public class AuthController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<ApiResult<Void>> verifyOtp(@Valid @RequestBody OtpVerifyRequest request) {
-        OtpPurpose purpose = OtpPurpose.valueOf(request.purpose().toUpperCase());
+    @Operation(summary = "Verify OTP", description = "Verifies OTP for verification or login completion")
+    public ResponseEntity<? extends ApiResult<?>> verifyOtp(
+            @Valid @RequestBody OtpVerifyRequest request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse) {
 
-        String traceId = MDC.get("traceId");
-        System.out.printf("OTP verification requested | email=%s | purpose=%s | traceId=%s%n",
-                request.email(), purpose, traceId);
+        OtpVerificationResult result =
+                authService.verifyOtp(request, httpRequest, httpResponse);
 
-        otpService.verifyOtp(request.email(), request.otp(), purpose);
+        if (result.purpose() == OtpPurpose.SIGNUP_VERIFICATION) {
+            return ApiResult.<Void>ok(null, "Email verified successfully")
+                    .toResponseEntity();
+        }
 
-        return ApiResult.<Void>ok(null, "OTP verified successfully")
+        return ApiResult.<AuthResponse>ok(result.authResponse(), "Login successful")
                 .toResponseEntity();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResult<AuthResponse>> login(
-            @Valid @RequestBody LoginRequest loginRequest,
-            HttpServletRequest httpRequest,
-            HttpServletResponse httpResponse) {
+    @Operation(summary = "User Logout", description = "Logout user and invalidate session/token")
+    public ResponseEntity<ApiResult<Void>> login(
+            @Valid @RequestBody LoginRequest loginRequest) {
 
-        AuthResponse authResponse = authService.login(loginRequest, httpRequest, httpResponse).getData();
+        ApiResult<Void> result = authService.initiateLogin(loginRequest);
 
-        return ApiResult.<AuthResponse>ok(authResponse, "Login successful")
-                .toResponseEntity();
+        return result.toResponseEntity();
     }
 
     @PostMapping("/logout")

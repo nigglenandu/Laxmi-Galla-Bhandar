@@ -24,10 +24,10 @@ import java.util.Set;
 @ToString(exclude = {"password"})   // ← important!
 public class User extends AuditableEntity<Long> {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     String firstName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     String lastName;
 
     @Column(nullable = false)

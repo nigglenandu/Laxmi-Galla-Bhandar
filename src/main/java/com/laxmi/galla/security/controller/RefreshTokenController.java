@@ -13,6 +13,8 @@ import com.laxmi.galla.repository.UserRepository;
 import com.laxmi.galla.security.dto.request.RefreshRequest;
 import com.laxmi.galla.security.dto.response.AuthResponse;
 import com.laxmi.galla.security.service.IAuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Token Controller", description = "APIs for refreshing and revoking JWT tokens")
 public class RefreshTokenController {
 
     private final IAuthService authService;
@@ -47,6 +50,8 @@ public class RefreshTokenController {
     private long refreshTokenExpirationMs;
 
     @PostMapping("/refresh")
+    @Operation(summary = "Refresh JWT tokens",
+            description = "Use a valid refresh token to get new access and refresh tokens. Handles token rotation.")
     public ResponseEntity<ApiResult<AuthResponse>> refresh(
             @Valid @RequestBody(required = false) RefreshRequest bodyRequest,
             HttpServletRequest request,
@@ -138,6 +143,8 @@ public class RefreshTokenController {
     }
 
     @PostMapping("/revoke")
+    @Operation(summary = "Revoke refresh token",
+            description = "Revoke a refresh token and clear cookies to logout the user session.")
     public ResponseEntity<ApiResult<Void>> revokeToken(
             HttpServletRequest request,
             HttpServletResponse response) {
