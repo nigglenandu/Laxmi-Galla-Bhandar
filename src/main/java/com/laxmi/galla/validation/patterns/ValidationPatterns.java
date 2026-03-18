@@ -22,7 +22,11 @@ public final class ValidationPatterns {
     public static final int PASSWORD_MIN_LENGTH = 8;
     public static final int PASSWORD_MAX_LENGTH = 255;
 
+    public static final Pattern NEPALI_PHONE = Pattern.compile("^(\\+977)?9[6-9][0-9]{8}$");
 
+    public static final Pattern PAN_NUMBER = Pattern.compile(
+            "^(?!([0-9])\\1{8})[0-9]{9}$"
+    );
 
     private ValidationPatterns() {
         throw new UnsupportedOperationException("Utility class");

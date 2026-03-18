@@ -23,7 +23,9 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword, Str
         if (trimmed.length() < ValidationPatterns.PASSWORD_MIN_LENGTH
                 || trimmed.length() > ValidationPatterns.PASSWORD_MAX_LENGTH) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("{password.length}")
+            context.buildConstraintViolationWithTemplate(
+                            context.getDefaultConstraintMessageTemplate()
+                    )
                     .addConstraintViolation();
             return false;
         }
@@ -31,7 +33,9 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword, Str
         // Pattern check
         if (!ValidationPatterns.PASSWORD.matcher(trimmed).matches()) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("{password.strength}")
+            context.buildConstraintViolationWithTemplate(
+                            context.getDefaultConstraintMessageTemplate()
+                    )
                     .addConstraintViolation();
             return false;
         }

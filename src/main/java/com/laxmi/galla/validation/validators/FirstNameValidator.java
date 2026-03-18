@@ -20,7 +20,7 @@ public class FirstNameValidator implements ConstraintValidator<ValidFirstName, S
             // Build a custom, clear error message
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(
-                    "Each part of the first name must start with an uppercase letter and can include letters, spaces, hyphens, and apostrophes"
+                    context.getDefaultConstraintMessageTemplate()
             ).addConstraintViolation();
             return false;
         }

@@ -1,24 +1,28 @@
 package com.laxmi.galla.validation.validators;
 
-import com.laxmi.galla.validation.annotations.ValidLastName;
+import com.laxmi.galla.validation.annotations.ValidNepaliPhone;
 import com.laxmi.galla.validation.patterns.ValidationPatterns;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.springframework.stereotype.Component;
 
-public class LastNameValidator implements ConstraintValidator<ValidLastName, String> {
+@Component
+public class NepaliPhoneValidator implements ConstraintValidator<ValidNepaliPhone, String> {
+
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-
+        // null/blank values are valid by default
         if (value == null || value.isBlank()) {
-            return true; // handled by @NotBlank if required
+            return true; // let @NotBlank handle required validation if needed
         }
 
         String trimmed = value.trim();
 
-        if (!ValidationPatterns.LAST_NAME.matcher(trimmed).matches()) {
+        // Pattern check
+        if (!ValidationPatterns.NEPALI_PHONE.matcher(trimmed).matches()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(
-                    context.getDefaultConstraintMessageTemplate()
+                    context.getDefaultConstraintMessageTemplate() // resolves message from annotation
             ).addConstraintViolation();
             return false;
         }

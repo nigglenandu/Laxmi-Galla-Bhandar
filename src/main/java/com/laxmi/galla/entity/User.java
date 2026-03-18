@@ -36,6 +36,9 @@ public class User extends AuditableEntity<Long> {
     @Column(nullable = false, unique = true)
     String email;
 
+    @Column(nullable = false, unique = true)
+    String phoneNo;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
