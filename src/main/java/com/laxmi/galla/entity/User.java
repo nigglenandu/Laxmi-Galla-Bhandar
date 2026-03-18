@@ -53,6 +53,7 @@ public class User extends AuditableEntity<Long> {
 
     // Very useful in practice
     Instant lastLoginAt;
+
     String lastLoginIp;
 
     // Optional: if you want to track failed login attempts
