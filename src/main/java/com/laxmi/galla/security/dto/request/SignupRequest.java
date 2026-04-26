@@ -1,5 +1,7 @@
 package com.laxmi.galla.security.dto.request;
 
+import com.laxmi.galla.validation.annotations.ValidFirstName;
+import com.laxmi.galla.validation.annotations.ValidPassword;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
@@ -11,7 +13,7 @@ public record SignupRequest(
 
     @NotBlank(message = "{firstName.required}")
     @Size(min = 2, max = 80, message = "{firstName.size}")
-//    @ValidFirstName
+    @ValidFirstName
     @Schema(description = "User's first name", example = "John", required = true)
     String firstName,
 
@@ -35,7 +37,7 @@ public record SignupRequest(
 
     @NotBlank(message = "{password.required}")
     @Size(min = 8, max = 255, message = "{password.size}")
-//    @ValidPassword
+    @ValidPassword
     @Schema(description = "Password (must meet complexity rules)", example = "Password@123", required = true)
     String password,
 

@@ -24,10 +24,10 @@ import java.util.Set;
 @ToString(exclude = {"password"})   // ← important!
 public class User extends AuditableEntity<Long> {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     String firstName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     String lastName;
 
     @Column(nullable = false)
@@ -35,6 +35,9 @@ public class User extends AuditableEntity<Long> {
 
     @Column(nullable = false, unique = true)
     String email;
+
+    @Column(nullable = false, unique = true)
+    String phoneNo;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -53,6 +56,7 @@ public class User extends AuditableEntity<Long> {
 
     // Very useful in practice
     Instant lastLoginAt;
+
     String lastLoginIp;
 
     // Optional: if you want to track failed login attempts
