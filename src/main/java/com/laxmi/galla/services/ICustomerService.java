@@ -1,7 +1,5 @@
 package com.laxmi.galla.services;
 
-import com.laxmi.galla.dto.CustomerRequestDto;
-import com.laxmi.galla.dto.CustomerResponseDto;
 import com.laxmi.galla.dto.PaginatedResponse;
 import org.springframework.data.domain.Pageable;
 

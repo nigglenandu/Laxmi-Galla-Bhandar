@@ -1,7 +1,7 @@
 package com.laxmi.galla.services;
 
-import com.laxmi.galla.dto.CategoryRequestDto;
-import com.laxmi.galla.dto.CategoryResponseDto;
+import com.laxmi.galla.dto.request.CategoryRequestDto;
+import com.laxmi.galla.dto.response.CategoryResponseDto;
 import com.laxmi.galla.entity.Category;
 
 import java.util.List;

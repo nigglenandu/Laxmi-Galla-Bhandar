@@ -26,10 +26,13 @@ public class Company extends AuditableEntity<String> {
     private String name;
 
     @Column(name = "pan_no")
-    private String panNo;
+    private String panNumber;
+
+    @Column(nullable = false, unique = true)
+    String phoneNo;
 
     @Column(name = "company_address")
-    private String companyAddress;
+    private String address;
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JsonManagedReference

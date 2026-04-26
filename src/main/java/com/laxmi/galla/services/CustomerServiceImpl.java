@@ -1,13 +1,10 @@
 package com.laxmi.galla.services;
 
-import com.laxmi.galla.dto.CustomerRequestDto;
-import com.laxmi.galla.dto.CustomerResponseDto;
 import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.entity.Category;
 import com.laxmi.galla.entity.CustomerEntity;
 import com.laxmi.galla.mapper.CustomerMapper;
 import com.laxmi.galla.repository.CustomerRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 

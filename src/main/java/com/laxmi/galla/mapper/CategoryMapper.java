@@ -1,6 +1,7 @@
 package com.laxmi.galla.mapper;
 
-import com.laxmi.galla.dto.*;
+import com.laxmi.galla.dto.request.CategoryRequestDto;
+import com.laxmi.galla.dto.response.CategoryResponseDto;
 import com.laxmi.galla.entity.*;
 import org.mapstruct.*;
 

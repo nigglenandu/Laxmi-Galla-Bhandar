@@ -13,6 +13,8 @@ import java.lang.annotation.*;
 public @interface ValidPassword {
 
     String message() default "{password.invalid}";
+    String lengthMessage() default "{password.length}"; // length-specific
+    String patternMessage() default "{password.strength}";
 
     Class<?>[] groups() default {};
 
