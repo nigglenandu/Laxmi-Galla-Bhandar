@@ -1,6 +1,8 @@
 package com.laxmi.galla.controller;
 
 import com.laxmi.galla.dto.PaginatedResponse;
+import com.laxmi.galla.dto.request.CustomerRequestDto;
+import com.laxmi.galla.dto.response.CustomerResponseDto;
 import com.laxmi.galla.services.ICustomerService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

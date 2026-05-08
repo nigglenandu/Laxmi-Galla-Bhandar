@@ -1,6 +1,8 @@
 package com.laxmi.galla.services;
 
 import com.laxmi.galla.dto.*;
+import com.laxmi.galla.dto.request.CompanyRequestDto;
+import com.laxmi.galla.dto.response.CompanyResponseDto;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
