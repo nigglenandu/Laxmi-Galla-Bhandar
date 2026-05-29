@@ -20,7 +20,7 @@ public interface ICustomerService {
     Optional<CustomerResponseDto> getCustomerById(Long id);
 
     // Update customer by ID using request DTO, return updated response DTO
-    Optional<CustomerResponseDto> updateCustomer(Long id, CustomerRequestDto dto);
+//    Optional<CustomerResponseDto> updateCustomer(Long id, CustomerRequestDto dto);
 
     // Delete customer by ID
     boolean deleteCustomer(Long id);
