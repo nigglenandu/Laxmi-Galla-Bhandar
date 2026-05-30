@@ -110,11 +110,9 @@ public class CustomerServiceImpl implements ICustomerService {
     }
 
     private Set<Category> fetchCategoryEntitiesByIds(Set<Long> ids) {
-
         if (ids == null || ids.isEmpty()) {
             return new HashSet<>();
         }
-
         Set<Category> categories =
                 new HashSet<>(categoryRepository.findAllById(ids));
 
