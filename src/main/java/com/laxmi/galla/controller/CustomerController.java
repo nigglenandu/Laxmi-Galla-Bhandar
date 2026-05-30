@@ -1,7 +1,11 @@
 package com.laxmi.galla.controller;
 
+import com.laxmi.galla.core.dto.response.ApiResult;
 import com.laxmi.galla.dto.PaginatedResponse;
+import com.laxmi.galla.dto.request.CustomerRequestDto;
+import com.laxmi.galla.dto.response.CustomerResponseDto;
 import com.laxmi.galla.services.ICustomerService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +25,9 @@ public class CustomerController {
 
     // Create customer
     @PostMapping
-    public ResponseEntity<CustomerResponseDto> createCustomer(@RequestBody CustomerRequestDto dto) {
+    public ApiResult<CustomerResponseDto> createCustomer(@Valid @RequestBody CustomerRequestDto dto) {
         CustomerResponseDto response = customerService.createCustomer(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ApiResult.created(response).toBuilder().message("Customer creation completed").build();
     }
 
     // Get all customers
@@ -42,15 +46,15 @@ public class CustomerController {
     }
 
     // Update customer
-    @PutMapping("/{id}")
-    public ResponseEntity<CustomerResponseDto> updateCustomer(
-            @PathVariable Long id,
-            @RequestBody CustomerRequestDto dto
-    ) {
-        return customerService.updateCustomer(id, dto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<CustomerResponseDto> updateCustomer(
+//            @PathVariable Long id,
+//            @RequestBody CustomerRequestDto dto
+//    ) {
+//        return customerService.updateCustomer(id, dto)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 
     // Delete customer
     @DeleteMapping("/{id}")

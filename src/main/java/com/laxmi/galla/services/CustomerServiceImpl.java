@@ -1,9 +1,13 @@
 package com.laxmi.galla.services;
 
+import com.laxmi.galla.core.exception.ResourceNotFoundException;
 import com.laxmi.galla.dto.PaginatedResponse;
+import com.laxmi.galla.dto.request.CustomerRequestDto;
+import com.laxmi.galla.dto.response.CustomerResponseDto;
 import com.laxmi.galla.entity.Category;
 import com.laxmi.galla.entity.CustomerEntity;
 import com.laxmi.galla.mapper.CustomerMapper;
+import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.repository.CustomerRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,13 +24,15 @@ public class CustomerServiceImpl implements ICustomerService {
     private final CustomerRepository customerRepository;
     private final ICategoryService categoryService; // must have a method to return Category entity
     private final CustomerMapper customerMapper;
+    private final CategoryRepository categoryRepository;
 
     public CustomerServiceImpl(CustomerRepository customerRepository,
                                ICategoryService categoryService,
-                               CustomerMapper customerMapper) {
+                               CustomerMapper customerMapper, CategoryRepository categoryRepository) {
         this.customerRepository = customerRepository;
         this.categoryService = categoryService;
         this.customerMapper = customerMapper;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
@@ -53,19 +59,19 @@ public class CustomerServiceImpl implements ICustomerService {
                 .map(customerMapper::toCustomerResponseDto);
     }
 
-    @Override
-    public Optional<CustomerResponseDto> updateCustomer(Long id, CustomerRequestDto dto) {
-        return customerRepository.findById(id)
-                .map(existing -> {
-                    existing.setName(dto.name());
-                    existing.setContact(dto.contact());
-                    existing.setAddress(dto.address());
-                    existing.setPanNo(dto.panNo());
-                    existing.setCategories(fetchCategoryEntitiesByIds(dto.categoryIds()));
-                    CustomerEntity updated = customerRepository.save(existing);
-                    return customerMapper.toCustomerResponseDto(updated);
-                });
-    }
+//    @Override
+//    public Optional<CustomerResponseDto> updateCustomer(Long id, CustomerRequestDto dto) {
+//        return customerRepository.findById(id)
+//                .map(existing -> {
+//                    existing.setName(dto.name());
+//                    existing.setContact(dto.contact());
+//                    existing.setAddress(dto.address());
+//                    existing.setPanNo(dto.panNo());
+//                    existing.setCategories(fetchCategoryEntitiesByIds(dto.categoryIds()));
+//                    CustomerEntity updated = customerRepository.save(existing);
+//                    return customerMapper.toCustomerResponseDto(updated);
+//                });
+//    }
 
     @Override
     public boolean deleteCustomer(Long id) {
@@ -103,13 +109,17 @@ public class CustomerServiceImpl implements ICustomerService {
         );
     }
 
-    // NEW: Fetch actual Category entities for Customer
     private Set<Category> fetchCategoryEntitiesByIds(Set<Long> ids) {
-        if (ids == null || ids.isEmpty()) return new HashSet<>();
-        return ids.stream()
-                .map(categoryService::getCategoryEntityById) // must return Optional<Category>
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toSet());
+        if (ids == null || ids.isEmpty()) {
+            return new HashSet<>();
+        }
+        Set<Category> categories =
+                new HashSet<>(categoryRepository.findAllById(ids));
+
+        if (categories.size() != ids.size()) {
+            throw new ResourceNotFoundException("Category", "ids");
+        }
+
+        return categories;
     }
 }

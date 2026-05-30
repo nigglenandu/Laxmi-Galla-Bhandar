@@ -44,4 +44,12 @@ public class CustomerEntity extends AuditableEntity<String> {
     )
     private Set<Category> categories = new HashSet<>();
 
+    @PrePersist
+    @PreUpdate
+    public void normalize() {
+        if (firstName != null) firstName = firstName.trim();
+        if (lastName != null) lastName = lastName.trim();
+        if (address != null) address = address.trim();
+        if (panNumber != null) panNumber = panNumber.trim().toUpperCase();
+    }
 }

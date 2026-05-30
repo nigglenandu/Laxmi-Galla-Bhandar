@@ -1,6 +1,8 @@
 package com.laxmi.galla.services;
 
 import com.laxmi.galla.dto.PaginatedResponse;
+import com.laxmi.galla.dto.request.CustomerRequestDto;
+import com.laxmi.galla.dto.response.CustomerResponseDto;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -18,7 +20,7 @@ public interface ICustomerService {
     Optional<CustomerResponseDto> getCustomerById(Long id);
 
     // Update customer by ID using request DTO, return updated response DTO
-    Optional<CustomerResponseDto> updateCustomer(Long id, CustomerRequestDto dto);
+//    Optional<CustomerResponseDto> updateCustomer(Long id, CustomerRequestDto dto);
 
     // Delete customer by ID
     boolean deleteCustomer(Long id);
