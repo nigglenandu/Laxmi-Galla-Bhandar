@@ -33,4 +33,20 @@ public interface CustomerMapper {
     default List<Long> mapCategoriesToIds(Set<Category> categories) {
         return categories.stream().map(Category::getId).toList();
     }
+
+    @AfterMapping
+    default void normalize(@MappingTarget CustomerEntity entity) {
+        entity.setFirstName(trim(entity.getFirstName()));
+        entity.setLastName(trim(entity.getLastName()));
+        entity.setAddress(trim(entity.getAddress()));
+        entity.setPanNumber(upperTrim(entity.getPanNumber()));
+    }
+
+    default String trim(String value) {
+        return value == null ? null : value.trim();
+    }
+
+    default String upperTrim(String value) {
+        return value == null ? null : value.trim().toUpperCase();
+    }
 }
