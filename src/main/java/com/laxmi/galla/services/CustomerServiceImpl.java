@@ -1,6 +1,7 @@
 package com.laxmi.galla.services;
 
 import com.laxmi.galla.core.exception.ResourceNotFoundException;
+import com.laxmi.galla.core.security.context.AuthContext;
 import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.dto.request.CustomerRequestDto;
 import com.laxmi.galla.dto.response.CustomerResponseDto;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,14 +25,16 @@ public class CustomerServiceImpl implements ICustomerService {
     private final ICategoryService categoryService; // must have a method to return Category entity
     private final CustomerMapper customerMapper;
     private final CategoryRepository categoryRepository;
+    private final AuthContext authContext;
 
     public CustomerServiceImpl(CustomerRepository customerRepository,
                                ICategoryService categoryService,
-                               CustomerMapper customerMapper, CategoryRepository categoryRepository) {
+                               CustomerMapper customerMapper, CategoryRepository categoryRepository, AuthContext authContext) {
         this.customerRepository = customerRepository;
         this.categoryService = categoryService;
         this.customerMapper = customerMapper;
         this.categoryRepository = categoryRepository;
+        this.authContext = authContext;
     }
 
     @Override
@@ -45,18 +47,21 @@ public class CustomerServiceImpl implements ICustomerService {
         return customerMapper.toCustomerResponseDto(saved);
     }
 
-    @Override
-    public List<CustomerResponseDto> getAllCustomers() {
-        return customerRepository.findAll()
-                .stream()
-                .map(customerMapper::toCustomerResponseDto)
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    public List<CustomerResponseDto> getAllCustomers() {
+//        return customerRepository.findAll()
+//                .stream()
+//                .map(customerMapper::toCustomerResponseDto)
+//                .collect(Collectors.toList());
+//    }
 
     @Override
-    public Optional<CustomerResponseDto> getCustomerById(Long id) {
-        return customerRepository.findById(id)
-                .map(customerMapper::toCustomerResponseDto);
+    public CustomerResponseDto getCurrentCustomerProfile() {
+        Long userId = authContext.getUserId();
+
+        return customerRepository.findById(userId).
+                map(customerMapper::toCustomerResponseDto).
+                orElseThrow(() -> new ResourceNotFoundException("Customer", userId.toString()));
     }
 
 //    @Override

@@ -14,13 +14,15 @@ public interface ICustomerService {
     CustomerResponseDto createCustomer(CustomerRequestDto dto);
 
     // Get all customers as response DTOs
-    List<CustomerResponseDto> getAllCustomers();
+//    List<CustomerResponseDto> getAllCustomers();
 
     // Get customer by ID as response DTO
-    Optional<CustomerResponseDto> getCustomerById(Long id);
+//    Optional<CustomerResponseDto> getCustomerById(Long id);
 
     // Update customer by ID using request DTO, return updated response DTO
 //    Optional<CustomerResponseDto> updateCustomer(Long id, CustomerRequestDto dto);
+
+    CustomerResponseDto getCurrentCustomerProfile();
 
     // Delete customer by ID
     boolean deleteCustomer(Long id);

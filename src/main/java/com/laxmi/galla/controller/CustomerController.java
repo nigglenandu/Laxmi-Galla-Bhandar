@@ -30,20 +30,24 @@ public class CustomerController {
         return ApiResult.created(response).toBuilder().message("Customer creation completed").build();
     }
 
-    // Get all customers
-    @GetMapping("/all")
-    public ResponseEntity<List<CustomerResponseDto>> getAllCustomers() {
-        List<CustomerResponseDto> response = customerService.getAllCustomers();
-        return ResponseEntity.ok(response);
-    }
+//    // Get all customers
+//    @GetMapping("/all")
+//    public ResponseEntity<List<CustomerResponseDto>> getAllCustomers() {
+//        List<CustomerResponseDto> response = customerService.getAllCustomers();
+//        return ResponseEntity.ok(response);
+//    }
 
     // Get customer by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<CustomerResponseDto> getCustomerById(@PathVariable Long id) {
-        return customerService.getCustomerById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/me")
+    public ApiResult<CustomerResponseDto> getMyProfile() {
+        return ApiResult.ok(customerService.getCurrentCustomerProfile());
     }
+
+//    @GetMapping("/{id}")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ApiResult<UserResponseDto> getUserById(@PathVariable Long id) {
+//        return ApiResult.ok(userService.getUserById(id));
+//    }
 
     // Update customer
 //    @PutMapping("/{id}")
