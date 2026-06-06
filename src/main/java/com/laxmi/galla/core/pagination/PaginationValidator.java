@@ -1,11 +1,25 @@
 package com.laxmi.galla.core.pagination;
 
 /**
- * All business validation rules.
+ * Centralized validation for pagination.
  */
 public final class PaginationValidator {
 
     private PaginationValidator() {}
+
+    public static void validate(int currentPage, int pageSize, Integer totalPages,
+                                PageResponse.PaginationMode mode) {
+
+        if (mode == null) {
+            throw new IllegalArgumentException("Pagination mode must not be null");
+        }
+
+        if (mode == PageResponse.PaginationMode.OFFSET) {
+            validateOffset(currentPage, pageSize, totalPages);
+        } else if (mode == PageResponse.PaginationMode.CURSOR) {
+            validateCursor(pageSize, currentPage, totalPages);
+        }
+    }
 
     public static void validateOffset(int currentPage, int pageSize, Integer totalPages) {
         if (pageSize <= 0) {
@@ -23,9 +37,12 @@ public final class PaginationValidator {
         }
     }
 
-    public static void validateCursor(int pageSize) {
+    public static void validateCursor(int pageSize, Integer currentPage, Integer totalPages) {
         if (pageSize <= 0) {
             throw new IllegalArgumentException("pageSize must be greater than 0");
+        }
+        if (currentPage != null || totalPages != null) {
+            throw new IllegalArgumentException("currentPage and totalPages must be null in CURSOR mode");
         }
     }
 }
