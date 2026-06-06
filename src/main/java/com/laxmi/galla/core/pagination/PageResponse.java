@@ -89,6 +89,7 @@ public record PageResponse<T>(
         links = (links != null) ? Map.copyOf(links) : Map.of();
         metadata = (metadata != null) ? Map.copyOf(metadata) : Map.of();
 
+
         // 2. Validate pageSize > 0
         if (pageSize <= 0) {
             throw new IllegalArgumentException("pageSize must be greater than 0");

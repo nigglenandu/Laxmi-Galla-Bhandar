@@ -69,7 +69,7 @@ public class PageResponseFactory {
             int pageSize) {
 
         if (map == null || map.isEmpty()) {
-            return PageResponse.empty(currentPage, pageSize);
+            return empty(currentPage, pageSize);
         }
 
         PaginationValidator.validateOffset(currentPage, pageSize, null);
