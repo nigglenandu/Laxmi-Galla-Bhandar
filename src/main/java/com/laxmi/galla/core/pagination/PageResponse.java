@@ -88,246 +88,274 @@ public record PageResponse<T>(
         content = (content != null) ? List.copyOf(content) : List.of();
         links = (links != null) ? Map.copyOf(links) : Map.of();
         metadata = (metadata != null) ? Map.copyOf(metadata) : Map.of();
+    }
+}
 
-        // 2. Validate pageSize > 0
-        if (pageSize <= 0) {
-            throw new IllegalArgumentException("pageSize must be greater than 0");
-        }
-
-        if (totalPages != null && totalPages < 0) {
-            throw new IllegalArgumentException("totalPages cannot be negative");
-        }
-
-        // 3. Validate currentPage >= 1 in OFFSET mode
-//        if (mode == PaginationMode.OFFSET) {
-//            if (currentPage == null || currentPage < 1) {
-//                throw new IllegalArgumentException("currentPage must be >= 1 in OFFSET mode");
+//        // 2. Validate pageSize > 0
+//        if (pageSize <= 0) {
+//            throw new IllegalArgumentException("pageSize must be greater than 0");
+//        }
+//
+//        if (totalPages != null && totalPages < 0) {
+//            throw new IllegalArgumentException("totalPages cannot be negative");
+//        }
+//
+//        // 3. Validate currentPage >= 1 in OFFSET mode
+////        if (mode == PaginationMode.OFFSET) {
+////            if (currentPage == null || currentPage < 1) {
+////                throw new IllegalArgumentException("currentPage must be >= 1 in OFFSET mode");
+////            }
+////        }
+//        // 3. Validate currentPage >= 1 in OFFSET mode
+//        if (mode == PaginationMode.OFFSET && totalPages != null && totalPages > 0 && currentPage > totalPages) {
+//            throw new IllegalArgumentException(
+//                    String.format("currentPage (%d) cannot exceed totalPages (%d)", currentPage, totalPages));
+//        }
+//
+//        // 4. CURSOR mode consistency
+//        if (mode == PaginationMode.CURSOR) {
+//            if (currentPage != null || totalPages != null) {
+//                throw new IllegalArgumentException("currentPage and totalPages should be null in CURSOR mode");
 //            }
 //        }
-        // 3. Validate currentPage >= 1 in OFFSET mode
-        if (mode == PaginationMode.OFFSET && totalPages != null && totalPages > 0 && currentPage > totalPages) {
-            throw new IllegalArgumentException(
-                    String.format("currentPage (%d) cannot exceed totalPages (%d)", currentPage, totalPages));
-        }
-
-        // 4. CURSOR mode consistency
-        if (mode == PaginationMode.CURSOR) {
-            if (currentPage != null || totalPages != null) {
-                throw new IllegalArgumentException("currentPage and totalPages should be null in CURSOR mode");
-            }
-        }
-
-
-        // Optional ultra-defensive check: currentPage ≤ totalPages in OFFSET mode
-        // Uncomment if you want strict consistency (prevents illogical pages)
-        /*
-        if (mode == PaginationMode.OFFSET && totalPages != null && currentPage > totalPages && totalPages > 0) {
-            throw new IllegalArgumentException("currentPage cannot exceed totalPages");
-        }
-        */
-    }
-
-    // ────────────────────────────────────────────────────────────────
-    // Factories – Spring Data Page (OFFSET mode)
-    // ────────────────────────────────────────────────────────────────
-
-    //    public static <T> PageResponse<T> fromPage(Page<T> page) {
-//        return new PageResponse<>(
+//
+//
+//        // Optional ultra-defensive check: currentPage ≤ totalPages in OFFSET mode
+//        // Uncomment if you want strict consistency (prevents illogical pages)
+//        /*
+//        if (mode == PaginationMode.OFFSET && totalPages != null && currentPage > totalPages && totalPages > 0) {
+//            throw new IllegalArgumentException("currentPage cannot exceed totalPages");
+//        }
+//        */
+//    }
+//
+//    // ────────────────────────────────────────────────────────────────
+//    // Factories – Spring Data Page (OFFSET mode)
+//    // ────────────────────────────────────────────────────────────────
+//
+//    //    public static <T> PageResponse<T> fromPage(Page<T> page) {
+////        return new PageResponse<>(
+////                page.getContent(),
+////                page.getNumber() + 1,
+////                page.getSize(),
+////                page.getTotalElements(),
+////                page.getTotalPages(),
+////                page.isFirst(),
+////                page.isLast(),
+////                page.hasNext(),
+////                page.hasPrevious(),
+////                null,
+////                null,
+////                Map.of(),
+////                Map.of(),
+////                PaginationMode.OFFSET
+////        );
+////    }
+//    public static <T> PageResponse<T> fromPage(Page<T> page) {
+//        return createOffsetPage(
 //                page.getContent(),
 //                page.getNumber() + 1,
 //                page.getSize(),
 //                page.getTotalElements(),
-//                page.getTotalPages(),
-//                page.isFirst(),
-//                page.isLast(),
-//                page.hasNext(),
-//                page.hasPrevious(),
-//                null,
-//                null,
-//                Map.of(),
-//                Map.of(),
-//                PaginationMode.OFFSET
+//                page.getTotalPages()
 //        );
 //    }
-    public static <T> PageResponse<T> fromPage(Page<T> page) {
-        return createOffsetPage(
-                page.getContent(),
-                page.getNumber() + 1,
-                page.getSize(),
-                page.getTotalElements(),
-                page.getTotalPages()
-        );
-    }
-
-    public static <T, R> PageResponse<R> fromPage(Page<T> page, Function<T, R> mapper) {
-        return fromPage(page.map(mapper));
-    }
-
-    // ────────────────────────────────────────────────────────────────
-    // Manual / List-based paging (OFFSET mode)
-    // ────────────────────────────────────────────────────────────────
-
-    //    public static <T> PageResponse<T> of(
+//
+//    public static <T, R> PageResponse<R> fromPage(Page<T> page, Function<T, R> mapper) {
+//        return fromPage(page.map(mapper));
+//    }
+//
+//    // ────────────────────────────────────────────────────────────────
+//    // Manual / List-based paging (OFFSET mode)
+//    // ────────────────────────────────────────────────────────────────
+//
+//    //    public static <T> PageResponse<T> of(
+////            List<T> content,
+////            int currentPage,    // 1-based
+////            int pageSize,
+////            long totalElements) {
+////
+////        // Simplified totalPages (pageSize > 0 guaranteed)
+////        int totalPages = totalElements == 0 ? 0 :
+////                (int) Math.ceil((double) totalElements / pageSize);
+////
+////        return new PageResponse<>(
+////                content,
+////                currentPage,
+////                pageSize,
+////                totalElements,
+////                totalPages,
+////                currentPage == 1,
+////                currentPage >= totalPages,
+////                currentPage < totalPages,
+////                currentPage > 1,
+////                null,
+////                null,
+////                Map.of(),
+////                Map.of(),
+////                PaginationMode.OFFSET
+////        );
+////    }
+//    public static <T> PageResponse<T> of(
 //            List<T> content,
-//            int currentPage,    // 1-based
+//            int currentPage,
 //            int pageSize,
 //            long totalElements) {
 //
-//        // Simplified totalPages (pageSize > 0 guaranteed)
+//        if (currentPage < 1) {
+//            throw new IllegalArgumentException("currentPage must be >= 1");
+//        }
+//
 //        int totalPages = totalElements == 0 ? 0 :
 //                (int) Math.ceil((double) totalElements / pageSize);
 //
+//        return createOffsetPage(content, currentPage, pageSize, totalElements, totalPages);
+//    }
+//
+//    // ────────────────────────────────────────────────────────────────
+//    // Cursor-based pagination
+//    // ────────────────────────────────────────────────────────────────
+//
+//    public static <T> PageResponse<T> fromCursor(
+//            List<T> content,
+//            String nextCursor,
+//            String previousCursor,
+//            int pageSize,
+//            long totalElements) {
+//
 //        return new PageResponse<>(
 //                content,
-//                currentPage,
+//                null,
 //                pageSize,
 //                totalElements,
-//                totalPages,
-//                currentPage == 1,
-//                currentPage >= totalPages,
-//                currentPage < totalPages,
-//                currentPage > 1,
 //                null,
-//                null,
+//                previousCursor == null,
+//                nextCursor == null,
+//                nextCursor != null,
+//                previousCursor != null,
+//                nextCursor,
+//                previousCursor,
 //                Map.of(),
 //                Map.of(),
-//                PaginationMode.OFFSET
+//                PaginationMode.CURSOR
 //        );
 //    }
-    public static <T> PageResponse<T> of(
-            List<T> content,
-            int currentPage,
-            int pageSize,
-            long totalElements) {
-
-        if (currentPage < 1) {
-            throw new IllegalArgumentException("currentPage must be >= 1");
-        }
-
-        int totalPages = totalElements == 0 ? 0 :
-                (int) Math.ceil((double) totalElements / pageSize);
-
-        return createOffsetPage(content, currentPage, pageSize, totalElements, totalPages);
-    }
-
-    // ────────────────────────────────────────────────────────────────
-    // Cursor-based pagination
-    // ────────────────────────────────────────────────────────────────
-
-    public static <T> PageResponse<T> fromCursor(
-            List<T> content,
-            String nextCursor,
-            String previousCursor,
-            int pageSize,
-            long totalElements) {
-
-        return new PageResponse<>(
-                content,
-                null,
-                pageSize,
-                totalElements,
-                null,
-                previousCursor == null,
-                nextCursor == null,
-                nextCursor != null,
-                previousCursor != null,
-                nextCursor,
-                previousCursor,
-                Map.of(),
-                Map.of(),
-                PaginationMode.CURSOR
-        );
-    }
-
-    // ────────────────────────────────────────────────────────────────
-    // Grouped / aggregated data (Map<K, List<V>>)
-    // ────────────────────────────────────────────────────────────────
-    // Note: Pages over groups (map.size()), not inner elements.
-    // If you need to page over flattened inner items, flatten the map first.
+//
+//    // ────────────────────────────────────────────────────────────────
+//    // Grouped / aggregated data (Map<K, List<V>>)
+//    // ────────────────────────────────────────────────────────────────
+//    // Note: Pages over groups (map.size()), not inner elements.
+//    // If you need to page over flattened inner items, flatten the map first.
+////    public static <K, V> PageResponse<GroupedPage<K, V>> fromMap(
+////            Map<K, List<V>> map,
+////            int currentPage,
+////            int pageSize) {
+////
+////        List<Map.Entry<K, List<V>>> entries = List.copyOf(map.entrySet());
+////
+////        int start = (currentPage - 1) * pageSize;
+////        int end = Math.min(start + pageSize, entries.size());
+////
+////        List<GroupedPage<K, V>> pagedGroups = (start >= entries.size())
+////                ? List.of()
+////                : entries.subList(start, end).stream()
+////                .map(e -> new GroupedPage<>(e.getKey(), e.getValue()))
+////                .toList();
+////
+////        long totalElements = map.values().stream().mapToLong(List::size).sum();
+////
+////        // Simplified totalPages (pageSize > 0 guaranteed)
+////        int totalPages = (int) Math.ceil((double) map.size() / pageSize);
+////
+////        return new PageResponse<>(
+////                pagedGroups,
+////                currentPage,
+////                pageSize,
+////                totalElements,
+////                totalPages,
+////                currentPage == 1,
+////                currentPage >= totalPages,
+////                currentPage < totalPages,
+////                currentPage > 1,
+////                null, null,
+////                Map.of(),
+////                Map.of(),
+////                PaginationMode.OFFSET
+////        );
+////    }
+//
 //    public static <K, V> PageResponse<GroupedPage<K, V>> fromMap(
 //            Map<K, List<V>> map,
 //            int currentPage,
 //            int pageSize) {
+//
+//        if (map == null || map.isEmpty()) {
+//            return PageResponse.empty(currentPage, pageSize);
+//        }
 //
 //        List<Map.Entry<K, List<V>>> entries = List.copyOf(map.entrySet());
 //
 //        int start = (currentPage - 1) * pageSize;
 //        int end = Math.min(start + pageSize, entries.size());
 //
-//        List<GroupedPage<K, V>> pagedGroups = (start >= entries.size())
+//        List<GroupedPage<K, V>> pagedGroups = start >= entries.size()
 //                ? List.of()
 //                : entries.subList(start, end).stream()
 //                .map(e -> new GroupedPage<>(e.getKey(), e.getValue()))
 //                .toList();
 //
 //        long totalElements = map.values().stream().mapToLong(List::size).sum();
+//        int totalGroups = map.size();
+//        int totalPages = totalGroups == 0 ? 0 :
+//                (int) Math.ceil((double) totalGroups / pageSize);
 //
-//        // Simplified totalPages (pageSize > 0 guaranteed)
-//        int totalPages = (int) Math.ceil((double) map.size() / pageSize);
-//
-//        return new PageResponse<>(
-//                pagedGroups,
-//                currentPage,
-//                pageSize,
-//                totalElements,
-//                totalPages,
-//                currentPage == 1,
-//                currentPage >= totalPages,
-//                currentPage < totalPages,
-//                currentPage > 1,
-//                null, null,
-//                Map.of(),
-//                Map.of(),
-//                PaginationMode.OFFSET
-//        );
+//        return createOffsetPage(pagedGroups, currentPage, pageSize, totalElements, totalPages);
 //    }
-
-    public static <K, V> PageResponse<GroupedPage<K, V>> fromMap(
-            Map<K, List<V>> map,
-            int currentPage,
-            int pageSize) {
-
-        if (map == null || map.isEmpty()) {
-            return PageResponse.empty(currentPage, pageSize);
-        }
-
-        List<Map.Entry<K, List<V>>> entries = List.copyOf(map.entrySet());
-
-        int start = (currentPage - 1) * pageSize;
-        int end = Math.min(start + pageSize, entries.size());
-
-        List<GroupedPage<K, V>> pagedGroups = start >= entries.size()
-                ? List.of()
-                : entries.subList(start, end).stream()
-                .map(e -> new GroupedPage<>(e.getKey(), e.getValue()))
-                .toList();
-
-        long totalElements = map.values().stream().mapToLong(List::size).sum();
-        int totalGroups = map.size();
-        int totalPages = totalGroups == 0 ? 0 :
-                (int) Math.ceil((double) totalGroups / pageSize);
-
-        return createOffsetPage(pagedGroups, currentPage, pageSize, totalElements, totalPages);
-    }
-
-    // ────────────────────────────────────────────────────────────────
-    // Empty page
-    // ────────────────────────────────────────────────────────────────
-
+//
+//    // ────────────────────────────────────────────────────────────────
+//    // Empty page
+//    // ────────────────────────────────────────────────────────────────
+//
+////    public static <T> PageResponse<T> empty(int currentPage, int pageSize) {
+////        boolean isFirst = currentPage <= 1;
+////        boolean isLast = true; // empty → always last
+////
+////        return new PageResponse<>(
+////                List.of(),
+////                currentPage,
+////                pageSize,
+////                0L,
+////                0,
+////                isFirst,
+////                isLast,
+////                false,
+////                currentPage > 1,
+////                null,
+////                null,
+////                Map.of(),
+////                Map.of(),
+////                PaginationMode.OFFSET
+////        );
+////    }
+//
+//    // ────────────────────────────────────────────────────────────────
+//// Empty page
+//// ────────────────────────────────────────────────────────────────
+//
 //    public static <T> PageResponse<T> empty(int currentPage, int pageSize) {
-//        boolean isFirst = currentPage <= 1;
-//        boolean isLast = true; // empty → always last
+//        // Normalize page number for empty results
+//        int normalizedPage = Math.max(1, currentPage);
 //
 //        return new PageResponse<>(
 //                List.of(),
-//                currentPage,
+//                normalizedPage,
 //                pageSize,
-//                0L,
-//                0,
-//                isFirst,
-//                isLast,
-//                false,
-//                currentPage > 1,
+//                0L,                    // totalElements
+//                0,                     // totalPages = 0
+//                true,                  // first
+//                true,                  // last
+//                false,                 // hasNext
+//                false,                 // hasPrevious
 //                null,
 //                null,
 //                Map.of(),
@@ -335,40 +363,44 @@ public record PageResponse<T>(
 //                PaginationMode.OFFSET
 //        );
 //    }
-
-    // ────────────────────────────────────────────────────────────────
-// Empty page
-// ────────────────────────────────────────────────────────────────
-
-    public static <T> PageResponse<T> empty(int currentPage, int pageSize) {
-        // Normalize page number for empty results
-        int normalizedPage = Math.max(1, currentPage);
-
-        return new PageResponse<>(
-                List.of(),
-                normalizedPage,
-                pageSize,
-                0L,                    // totalElements
-                0,                     // totalPages = 0
-                true,                  // first
-                true,                  // last
-                false,                 // hasNext
-                false,                 // hasPrevious
-                null,
-                null,
-                Map.of(),
-                Map.of(),
-                PaginationMode.OFFSET
-        );
-    }
-
-    // ────────────────────────────────────────────────────────────────
-    // Optional HATEOAS links builder (call in controller)
-    // ────────────────────────────────────────────────────────────────
-
+//
+//    // ────────────────────────────────────────────────────────────────
+//    // Optional HATEOAS links builder (call in controller)
+//    // ────────────────────────────────────────────────────────────────
+//
+////    public PageResponse<T> withLinks(String baseUrl) {
+////        // Skip if not OFFSET mode or missing page info
+////        if (mode != PaginationMode.OFFSET || currentPage == null || totalPages == null) {
+////            return this;
+////        }
+////
+////        Map<String, String> linksMap = new HashMap<>();
+////        String query = "?page=%d&size=%d";
+////
+////        linksMap.put("self", baseUrl + query.formatted(currentPage, pageSize));
+////        if (hasNext) linksMap.put("next", baseUrl + query.formatted(currentPage + 1, pageSize));
+////        if (hasPrevious) linksMap.put("prev", baseUrl + query.formatted(currentPage - 1, pageSize));
+////        linksMap.put("first", baseUrl + query.formatted(1, pageSize));
+////        linksMap.put("last", baseUrl + query.formatted(totalPages, pageSize));
+////
+////        return new PageResponse<>(
+////                content, currentPage, pageSize, totalElements, totalPages,
+////                first, last, hasNext, hasPrevious,
+////                nextCursor, previousCursor,
+////                Map.copyOf(linksMap),
+////                metadata,
+////                mode
+////        );
+////    }
+//
 //    public PageResponse<T> withLinks(String baseUrl) {
 //        // Skip if not OFFSET mode or missing page info
 //        if (mode != PaginationMode.OFFSET || currentPage == null || totalPages == null) {
+//            return this;
+//        }
+//
+//        // Extra safety for empty results
+//        if (totalPages == 0) {
 //            return this;
 //        }
 //
@@ -390,79 +422,49 @@ public record PageResponse<T>(
 //                mode
 //        );
 //    }
-
-    public PageResponse<T> withLinks(String baseUrl) {
-        // Skip if not OFFSET mode or missing page info
-        if (mode != PaginationMode.OFFSET || currentPage == null || totalPages == null) {
-            return this;
-        }
-
-        // Extra safety for empty results
-        if (totalPages == 0) {
-            return this;
-        }
-
-        Map<String, String> linksMap = new HashMap<>();
-        String query = "?page=%d&size=%d";
-
-        linksMap.put("self", baseUrl + query.formatted(currentPage, pageSize));
-        if (hasNext) linksMap.put("next", baseUrl + query.formatted(currentPage + 1, pageSize));
-        if (hasPrevious) linksMap.put("prev", baseUrl + query.formatted(currentPage - 1, pageSize));
-        linksMap.put("first", baseUrl + query.formatted(1, pageSize));
-        linksMap.put("last", baseUrl + query.formatted(totalPages, pageSize));
-
-        return new PageResponse<>(
-                content, currentPage, pageSize, totalElements, totalPages,
-                first, last, hasNext, hasPrevious,
-                nextCursor, previousCursor,
-                Map.copyOf(linksMap),
-                metadata,
-                mode
-        );
-    }
-
-    // Optional: add metadata
-    public PageResponse<T> withMetadata(Map<String, Object> extraMetadata) {
-        return new PageResponse<>(
-                content, currentPage, pageSize, totalElements, totalPages,
-                first, last, hasNext, hasPrevious,
-                nextCursor, previousCursor, links,
-                extraMetadata != null ? Map.copyOf(extraMetadata) : Map.of(),
-                mode
-        );
-    }
-
-    // ────────────────────────────────────────────────────────────────
-// Private Helper
-// ────────────────────────────────────────────────────────────────
-
-    static <T> PageResponse<T> createOffsetPage(
-            List<T> content,
-            int currentPage,
-            int pageSize,
-            long totalElements,
-            int totalPages) {
-
-        boolean isFirst = currentPage == 1;
-        boolean isLast = totalPages == 0 || currentPage == totalPages;
-        boolean hasNext = currentPage < totalPages;
-        boolean hasPrevious = currentPage > 1;
-
-        return new PageResponse<>(
-                content,
-                currentPage,
-                pageSize,
-                totalElements,
-                totalPages,
-                isFirst,
-                isLast,
-                hasNext,
-                hasPrevious,
-                null,
-                null,
-                Map.of(),
-                Map.of(),
-                PaginationMode.OFFSET
-        );
-    }
-}
+//
+//    // Optional: add metadata
+//    public PageResponse<T> withMetadata(Map<String, Object> extraMetadata) {
+//        return new PageResponse<>(
+//                content, currentPage, pageSize, totalElements, totalPages,
+//                first, last, hasNext, hasPrevious,
+//                nextCursor, previousCursor, links,
+//                extraMetadata != null ? Map.copyOf(extraMetadata) : Map.of(),
+//                mode
+//        );
+//    }
+//
+//    // ────────────────────────────────────────────────────────────────
+//// Private Helper
+//// ────────────────────────────────────────────────────────────────
+//
+//    static <T> PageResponse<T> createOffsetPage(
+//            List<T> content,
+//            int currentPage,
+//            int pageSize,
+//            long totalElements,
+//            int totalPages) {
+//
+//        boolean isFirst = currentPage == 1;
+//        boolean isLast = totalPages == 0 || currentPage == totalPages;
+//        boolean hasNext = currentPage < totalPages;
+//        boolean hasPrevious = currentPage > 1;
+//
+//        return new PageResponse<>(
+//                content,
+//                currentPage,
+//                pageSize,
+//                totalElements,
+//                totalPages,
+//                isFirst,
+//                isLast,
+//                hasNext,
+//                hasPrevious,
+//                null,
+//                null,
+//                Map.of(),
+//                Map.of(),
+//                PaginationMode.OFFSET
+//        );
+//    }
+//}
