@@ -1,8 +1,6 @@
 package com.laxmi.galla.core.pagination;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,7 +22,7 @@ public class PaginationPolicy {
 
     // Whitelisted sortable fields (security + performance)
     private static final Set<String> ALLOWED_SORT_FIELDS =
-            Set.of("id", "createdat", "updatedat", "name", "email", "phone", "status", "active");
+            Set.of("id", "createdAt", "updatedAt", "name", "email", "phone", "status", "active");
 
     private static final Sort DEFAULT_SORT = Sort.by("id").descending();
 
