@@ -3,6 +3,7 @@ package com.laxmi.galla.services;
 import com.laxmi.galla.core.exception.ResourceNotFoundException;
 import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseFactory;
+import com.laxmi.galla.core.pagination.PaginationPolicy;
 import com.laxmi.galla.core.security.context.AuthContext;
 import com.laxmi.galla.dto.CustomerSearchCriteria;
 import com.laxmi.galla.dto.PaginatedResponse;
@@ -14,6 +15,7 @@ import com.laxmi.galla.mapper.CustomerMapper;
 import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.repository.CustomerRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -31,15 +33,17 @@ public class CustomerServiceImpl implements ICustomerService {
     private final CustomerMapper customerMapper;
     private final CategoryRepository categoryRepository;
     private final AuthContext authContext;
+    private final PaginationPolicy paginationPolicy;
 
     public CustomerServiceImpl(CustomerRepository customerRepository,
                                ICategoryService categoryService,
-                               CustomerMapper customerMapper, CategoryRepository categoryRepository, AuthContext authContext) {
+                               CustomerMapper customerMapper, CategoryRepository categoryRepository, AuthContext authContext, PaginationPolicy paginationPolicy) {
         this.customerRepository = customerRepository;
         this.categoryService = categoryService;
         this.customerMapper = customerMapper;
         this.categoryRepository = categoryRepository;
         this.authContext = authContext;
+        this.paginationPolicy = paginationPolicy;
     }
 
     @Override
@@ -57,15 +61,11 @@ public class CustomerServiceImpl implements ICustomerService {
             CustomerSearchCriteria criteria, Pageable pageable
     ) {
 
-        PageRequestResolver.Resolved resolved = PageRequestResolver.resolve(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                pageable.getSort()
-        );
+        Pageable safePageable = paginationPolicy.apply(pageable);
 
         Specification<CustomerEntity> spec = CustomerSpecification.withCriteria(criteria);
 
-        Page<CustomerEntity> page = customerRepository.findAll(spec, resolved.toPageRequest());
+        Page<CustomerEntity> page = customerRepository.findAll(spec, safePageable);
 
         return PageResponseFactory.fromPage(page, customerMapper::toCustomerResponseDto);
     }
