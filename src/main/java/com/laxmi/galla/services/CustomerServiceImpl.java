@@ -1,7 +1,10 @@
 package com.laxmi.galla.services;
 
 import com.laxmi.galla.core.exception.ResourceNotFoundException;
+import com.laxmi.galla.core.pagination.PageResponse;
+import com.laxmi.galla.core.pagination.PageResponseFactory;
 import com.laxmi.galla.core.security.context.AuthContext;
+import com.laxmi.galla.dto.CustomerSearchCriteria;
 import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.dto.request.CustomerRequestDto;
 import com.laxmi.galla.dto.response.CustomerResponseDto;
@@ -10,7 +13,9 @@ import com.laxmi.galla.entity.CustomerEntity;
 import com.laxmi.galla.mapper.CustomerMapper;
 import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.repository.CustomerRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -47,13 +52,24 @@ public class CustomerServiceImpl implements ICustomerService {
         return customerMapper.toCustomerResponseDto(saved);
     }
 
-//    @Override
-//    public List<CustomerResponseDto> getAllCustomers() {
-//        return customerRepository.findAll()
-//                .stream()
-//                .map(customerMapper::toCustomerResponseDto)
-//                .collect(Collectors.toList());
-//    }
+    @Override
+    public PageResponse<CustomerResponseDto> getAllCustomers(
+            CustomerSearchCriteria criteria, Pageable pageable
+    ) {
+
+        PageRequestResolver.Resolved resolved = PageRequestResolver.resolve(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort()
+        );
+
+        Specification<CustomerEntity> spec = CustomerSpecification.withCriteria(criteria);
+
+        Page<CustomerEntity> page = customerRepository.findAll(spec, resolved.toPageRequest());
+
+        return PageResponseFactory.fromPage(page, customerMapper::toCustomerResponseDto);
+    }
+
 
     @Override
     public CustomerResponseDto getCurrentCustomerProfile() {
