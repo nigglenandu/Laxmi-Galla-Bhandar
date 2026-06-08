@@ -1,5 +1,7 @@
 package com.laxmi.galla.services;
 
+import com.laxmi.galla.core.pagination.PageResponse;
+import com.laxmi.galla.dto.CustomerSearchCriteria;
 import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.dto.request.CustomerRequestDto;
 import com.laxmi.galla.dto.response.CustomerResponseDto;
@@ -14,7 +16,8 @@ public interface ICustomerService {
     CustomerResponseDto createCustomer(CustomerRequestDto dto);
 
     // Get all customers as response DTOs
-//    List<CustomerResponseDto> getAllCustomers();
+    PageResponse<CustomerResponseDto> getAllCustomers(CustomerSearchCriteria criteria,
+                                                      Pageable pageable);
 
     // Get customer by ID as response DTO
 //    Optional<CustomerResponseDto> getCustomerById(Long id);
