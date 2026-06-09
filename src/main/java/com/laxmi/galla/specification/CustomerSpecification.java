@@ -17,6 +17,7 @@ public class CustomerSpecification {
     public static Specification<CustomerEntity> withCriteria(CustomerSearchCriteria criteria) {
         Specification<CustomerEntity> spec =
                 (root, query, cb) -> cb.conjunction();
+        if (criteria == null) return spec;
         String term = criteria.searchTerm();
         // 1. Multi-field search
         if (term != null && !term.isBlank()) {
@@ -39,11 +40,13 @@ public class CustomerSpecification {
         }
 
         // 3. Category filter (safe LEFT JOIN)
-        if (criteria.categoryId() != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(root.join("categories", JoinType.LEFT).get("id"), criteria.categoryId())
+        spec = spec.and((root, query, cb) -> {
+            query.distinct(true); // safe here ONLY if you keep it at root level
+            return cb.equal(
+                    root.join("categories", JoinType.LEFT).get("id"),
+                    criteria.categoryId()
             );
-        }
+        });
 
         // 4. Date range (safe null handling)
         if (criteria.createdFrom() != null) {
