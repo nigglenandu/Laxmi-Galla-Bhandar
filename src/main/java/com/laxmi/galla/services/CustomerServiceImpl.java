@@ -14,6 +14,7 @@ import com.laxmi.galla.entity.CustomerEntity;
 import com.laxmi.galla.mapper.CustomerMapper;
 import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.repository.CustomerRepository;
+import com.laxmi.galla.specification.CustomerSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
