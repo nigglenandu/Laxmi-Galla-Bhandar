@@ -27,6 +27,10 @@ public interface ICustomerService {
 
     CustomerResponseDto getCurrentCustomerProfile();
 
+    CustomerResponseDto updateCustomer(Long id, CustomerRequestDto dto);
+
+    CustomerResponseDto updateMyProfile(CustomerRequestDto dto);
+
     // Delete customer by ID
     boolean deleteCustomer(Long id);
 

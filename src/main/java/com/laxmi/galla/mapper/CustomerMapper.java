@@ -34,6 +34,9 @@ public interface CustomerMapper {
         return categories.stream().map(Category::getId).toList();
     }
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateCustomer(CustomerRequestDto dto, @MappingTarget CustomerEntity entity);
+
     @AfterMapping
     default void normalize(@MappingTarget CustomerEntity entity) {
         entity.setFirstName(trim(entity.getFirstName()));
