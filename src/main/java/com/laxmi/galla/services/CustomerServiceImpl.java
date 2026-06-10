@@ -1,5 +1,6 @@
 package com.laxmi.galla.services;
 
+import com.laxmi.galla.core.exception.DuplicateResourceException;
 import com.laxmi.galla.core.exception.ResourceNotFoundException;
 import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseFactory;
@@ -15,6 +16,7 @@ import com.laxmi.galla.mapper.CustomerMapper;
 import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.repository.CustomerRepository;
 import com.laxmi.galla.specification.CustomerSpecification;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -74,13 +76,63 @@ public class CustomerServiceImpl implements ICustomerService {
 
     @Override
     public CustomerResponseDto getCurrentCustomerProfile() {
-        Long userId = authContext.getUserId();
 
-        return customerRepository.findById(userId).
-                map(customerMapper::toCustomerResponseDto).
-                orElseThrow(() -> new ResourceNotFoundException("Customer", userId.toString()));
+        return customerMapper.toCustomerResponseDto(
+                getCustomerOrThrow(authContext.getUserId()));
     }
 
+    @Override
+    @Transactional
+    public CustomerResponseDto updateCustomer(Long id, CustomerRequestDto dto) {
+        CustomerEntity customer = getCustomerOrThrow(id);
+
+        applyUpdate(customer, dto);
+
+        CustomerEntity updated = customerRepository.save(customer);
+
+        eventPublisher.publishEvent(new CustomerUpdatedEvent(updated.getId(), authContext.getUserId()));
+
+        return customerMapper.toCustomerResponseDto(updated);
+    }
+
+    @Override
+    @Transactional
+    public CustomerResponseDto updateMyProfile(CustomerRequestDto dto) {
+
+        CustomerEntity customer = getCustomerOrThrow(authContext.getUserId());
+
+        applyUpdate(customer, dto);
+
+        CustomerEntity updated = customerRepository.save(customer);
+
+        eventPublisher.publishEvent(new CustomerUpdatedEvent(updated.getId(), currentUserId));
+
+        return customerMapper.toCustomerResponseDto(updated);
+    }
+
+    private void applyUpdate(CustomerEntity customer, CustomerRequestDto dto){
+        validateUpdate(customer, dto);
+        customerMapper.updateCustomer(dto, customer);
+        if(dto.categoryIds() != null){
+            Set<Category> categories = fetchCategoryEntitiesByIds(dto.categoryIds());
+            customer.setCategories(categories);
+        }
+    }
+
+    private CustomerEntity getCustomerOrThrow(Long id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Customer", id.toString()));
+    }
+
+
+    private void validateUpdate(CustomerEntity existing, CustomerRequestDto dto) {
+        if (dto.panNumber() != null && !dto.panNumber().equals(existing.getPanNumber())) {
+            if (customerRepository.existsByPanNumberAndIdNot(dto.panNumber(), existing.getId())) {
+                throw new DuplicateResourceException("PAN number already exists");
+            }
+        }
+    }
 //    @Override
 //    public Optional<CustomerResponseDto> updateCustomer(Long id, CustomerRequestDto dto) {
 //        return customerRepository.findById(id)
