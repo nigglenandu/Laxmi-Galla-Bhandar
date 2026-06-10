@@ -7,6 +7,7 @@ import com.laxmi.galla.core.pagination.PageResponseFactory;
 import com.laxmi.galla.core.pagination.PaginationPolicy;
 import com.laxmi.galla.core.security.context.AuthContext;
 import com.laxmi.galla.dto.CustomerSearchCriteria;
+import com.laxmi.galla.customer.event.CustomerUpdatedEvent;
 import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.dto.request.CustomerRequestDto;
 import com.laxmi.galla.dto.response.CustomerResponseDto;
@@ -17,18 +18,21 @@ import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.repository.CustomerRepository;
 import com.laxmi.galla.specification.CustomerSpecification;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CustomerServiceImpl implements ICustomerService {
 
     private final CustomerRepository customerRepository;
@@ -37,17 +41,7 @@ public class CustomerServiceImpl implements ICustomerService {
     private final CategoryRepository categoryRepository;
     private final AuthContext authContext;
     private final PaginationPolicy paginationPolicy;
-
-    public CustomerServiceImpl(CustomerRepository customerRepository,
-                               ICategoryService categoryService,
-                               CustomerMapper customerMapper, CategoryRepository categoryRepository, AuthContext authContext, PaginationPolicy paginationPolicy) {
-        this.customerRepository = customerRepository;
-        this.categoryService = categoryService;
-        this.customerMapper = customerMapper;
-        this.categoryRepository = categoryRepository;
-        this.authContext = authContext;
-        this.paginationPolicy = paginationPolicy;
-    }
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public CustomerResponseDto createCustomer(CustomerRequestDto dto) {
@@ -90,7 +84,15 @@ public class CustomerServiceImpl implements ICustomerService {
 
         CustomerEntity updated = customerRepository.save(customer);
 
-        eventPublisher.publishEvent(new CustomerUpdatedEvent(updated.getId(), authContext.getUserId()));
+        String correlationId = Optional.ofNullable(authContext.getCorrelationId())
+                .orElse(UUID.randomUUID().toString());
+
+        eventPublisher.publishEvent(
+                CustomerUpdatedEvent.of(
+                        updated.getId().toString(),
+                        correlationId
+                )
+        );
 
         return customerMapper.toCustomerResponseDto(updated);
     }
@@ -105,13 +107,21 @@ public class CustomerServiceImpl implements ICustomerService {
 
         CustomerEntity updated = customerRepository.save(customer);
 
-        eventPublisher.publishEvent(new CustomerUpdatedEvent(updated.getId(), currentUserId));
+        String correlationId = Optional.ofNullable(authContext.getCorrelationId())
+                .orElse(UUID.randomUUID().toString());
+
+        eventPublisher.publishEvent(
+                CustomerUpdatedEvent.of(
+                        updated.getId().toString(),
+                        correlationId
+                )
+        );
 
         return customerMapper.toCustomerResponseDto(updated);
     }
 
     private void applyUpdate(CustomerEntity customer, CustomerRequestDto dto){
-        validateUpdate(customer, dto);
+        validatePanUniqueness(customer, dto);
         customerMapper.updateCustomer(dto, customer);
         if(dto.categoryIds() != null){
             Set<Category> categories = fetchCategoryEntitiesByIds(dto.categoryIds());
@@ -126,13 +136,27 @@ public class CustomerServiceImpl implements ICustomerService {
     }
 
 
-    private void validateUpdate(CustomerEntity existing, CustomerRequestDto dto) {
-        if (dto.panNumber() != null && !dto.panNumber().equals(existing.getPanNumber())) {
-            if (customerRepository.existsByPanNumberAndIdNot(dto.panNumber(), existing.getId())) {
-                throw new DuplicateResourceException("PAN number already exists");
-            }
+    private void validatePanUniqueness(CustomerEntity existing, CustomerRequestDto dto) {
+
+        String newPan = dto.panNumber();
+        String oldPan = existing.getPanNumber();
+
+        if (newPan == null || newPan.equals(oldPan)) {
+            return;
+        }
+
+        boolean exists = customerRepository
+                .existsByPanNumberAndIdNot(newPan, existing.getId());
+
+        if (exists) {
+            throw new DuplicateResourceException(
+                    "Customer",
+                    "panNumber",
+                    dto.panNumber()
+            );
         }
     }
+
 //    @Override
 //    public Optional<CustomerResponseDto> updateCustomer(Long id, CustomerRequestDto dto) {
 //        return customerRepository.findById(id)
