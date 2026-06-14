@@ -51,8 +51,11 @@ public class User extends AuditableEntity<Long> {
     @Builder.Default
     boolean emailVerified = false;
 
+//    @Builder.Default
+//    boolean active = true;
+
     @Builder.Default
-    boolean active = true;
+    boolean accountLocked = false;
 
     // Very useful in practice
     Instant lastLoginAt;
@@ -62,4 +65,23 @@ public class User extends AuditableEntity<Long> {
     // Optional: if you want to track failed login attempts
     @Builder.Default
     int failedLoginAttempts = 0;
+
+    private void normalize() {
+
+        if (firstName != null) {
+            firstName = firstName.trim();
+        }
+
+        if (lastName != null) {
+            lastName = lastName.trim();
+        }
+
+        if (email != null) {
+            email = email.trim().toLowerCase();
+        }
+
+        if (phoneNo != null) {
+            phoneNo = phoneNo.trim();
+        }
+    }
 }

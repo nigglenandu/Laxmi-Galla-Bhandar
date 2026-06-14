@@ -1,11 +1,10 @@
 package com.laxmi.galla.entity;
 
 import com.laxmi.galla.core.model.AuditableEntity;
+import com.laxmi.galla.enums.AccountStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,8 +13,6 @@ import java.util.Set;
 @Table(name = "customer_entity", indexes = {
         @Index(name = "idx_customer_contact", columnList = "contact")
 })
-@SQLDelete(sql = "UPDATE customer_entity SET is_deleted = true WHERE id = ?")
-@Where(clause = "is_deleted = false")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,11 +20,9 @@ import java.util.Set;
 @Builder
 public class CustomerEntity extends AuditableEntity<String> {
 
-    @Column(nullable = false)
-    String firstName;
-
-    @Column(nullable = false)
-    String lastName;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Size(max = 255, message = "Address too long")
     private String address;
@@ -35,6 +30,11 @@ public class CustomerEntity extends AuditableEntity<String> {
     @Pattern(regexp = "[A-Z0-9]{10}", message = "PAN must be 10 characters")
     @Column(name = "pan_number", unique = true)
     private String panNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private AccountStatus status = AccountStatus.ACTIVE;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -44,12 +44,44 @@ public class CustomerEntity extends AuditableEntity<String> {
     )
     private Set<Category> categories = new HashSet<>();
 
-    @PrePersist
-    @PreUpdate
-    public void normalize() {
-        if (firstName != null) firstName = firstName.trim();
-        if (lastName != null) lastName = lastName.trim();
+    protected void normalize() {
         if (address != null) address = address.trim();
         if (panNumber != null) panNumber = panNumber.trim().toUpperCase();
+
+        if (status == null) {
+            status = AccountStatus.ACTIVE;
+        }
     }
+
+    public boolean isBlocked() {
+        return this.status == AccountStatus.BLOCKED;
+    }
+
+    /**
+     * Domain behavior - controlled status transition.
+     * Extend this with a full state machine (Spring State Machine) when complexity grows.
+     */
+//    public void changeStatus(AccountStatus newStatus) {
+//        if (this.status == AccountStatus.DELETED) {
+//            throw new IllegalStateException("Cannot modify status of a deleted customer");
+//        }
+//        // Add business rules here (e.g., BLOCKED → only by compliance role, etc.)
+//        this.status = newStatus;
+//    }
+
+    /**
+     * Explicit soft delete method (consistent with @SQLDelete).
+     */
+//    public void softDelete() {
+//        this.status = AccountStatus.DELETED;
+//    }
+
+    /**
+     * Convenience methods for common status checks.
+     */
+//    public boolean isActive() {
+//        return this.status == AccountStatus.ACTIVE;
+//    }
+
+
 }

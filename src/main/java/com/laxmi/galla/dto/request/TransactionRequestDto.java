@@ -1,6 +1,6 @@
 package com.laxmi.galla.dto.request;
 
-import com.laxmi.galla.entity.enums.PurchaseOrSale;
+import com.laxmi.galla.enums.PurchaseOrSale;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;

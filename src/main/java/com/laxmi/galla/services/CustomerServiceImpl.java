@@ -21,15 +21,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -157,19 +153,6 @@ public class CustomerServiceImpl implements ICustomerService {
         }
     }
 
-//    @Override
-//    public Optional<CustomerResponseDto> updateCustomer(Long id, CustomerRequestDto dto) {
-//        return customerRepository.findById(id)
-//                .map(existing -> {
-//                    existing.setName(dto.name());
-//                    existing.setContact(dto.contact());
-//                    existing.setAddress(dto.address());
-//                    existing.setPanNo(dto.panNo());
-//                    existing.setCategories(fetchCategoryEntitiesByIds(dto.categoryIds()));
-//                    CustomerEntity updated = customerRepository.save(existing);
-//                    return customerMapper.toCustomerResponseDto(updated);
-//                });
-//    }
 
     @Override
     public boolean deleteCustomer(Long id) {
@@ -179,24 +162,6 @@ public class CustomerServiceImpl implements ICustomerService {
                     return true;
                 }).orElse(false);
     }
-
-//    @Override
-//    public PaginatedResponse<CustomerResponseDto> getCustomersPaginated(Pageable pageable) {
-//        Page<CustomerEntity> page = customerRepository.findAll(pageable);
-//        List<CustomerResponseDto> content = page.getContent()
-//                .stream()
-//                .map(customerMapper::toCustomerResponseDto)
-//                .collect(Collectors.toList());
-//
-//        return new PaginatedResponse<>(
-//                content,
-//                page.isLast(),
-//                page.getNumber(),
-//                page.getSize(),
-//                page.getTotalElements(),
-//                page.getTotalPages()
-//        );
-//    }
 
     // 2. Use this service method
     @Override

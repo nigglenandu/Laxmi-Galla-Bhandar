@@ -1,4 +1,4 @@
-package com.laxmi.galla.entity.enums;
+package com.laxmi.galla.enums;
 
 public enum PurchaseOrSale {
     PURCHASE,
