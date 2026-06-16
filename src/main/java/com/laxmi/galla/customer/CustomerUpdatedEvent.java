@@ -1,4 +1,4 @@
-package com.laxmi.galla.customer.event;
+package com.laxmi.galla.customer;
 
 import com.laxmi.galla.core.event.DomainEvent;
 import com.laxmi.galla.customer.CustomerEventTypes;
