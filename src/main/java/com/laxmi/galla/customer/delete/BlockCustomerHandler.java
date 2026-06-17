@@ -6,34 +6,34 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DeleteCustomerHandler implements AccountActionHandler{
+public class BlockCustomerHandler implements AccountActionHandler {
+
     private final ApplicationEventPublisher eventPublisher;
 
-    public DeleteCustomerHandler(ApplicationEventPublisher eventPublisher) {
+    public BlockCustomerHandler(ApplicationEventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
     }
 
     @Override
     public AccountAction supports() {
-        return AccountAction.DELETE;
+        return AccountAction.BLOCK;
     }
 
     @Override
     public void handle(CustomerEntity customer, String reason, String performedBy) {
-
         String finalReason = ActionReasonUtils.buildReason(
                 reason,
-                AccountAction.DELETE.name(),
+                AccountAction.BLOCK.name(),
                 performedBy
         );
 
-        customer.markAsDeleted(performedBy);
+        customer.block(finalReason, performedBy);
 
         eventPublisher.publishEvent(
-                CustomerDeletedEvent.of(
-                        customer.getId().toString(),
+                CustomerBlockedEvent.of(customer.getId().toString(),
                         performedBy,
-                        finalReason)
+                        finalReason
+                )
         );
     }
 }

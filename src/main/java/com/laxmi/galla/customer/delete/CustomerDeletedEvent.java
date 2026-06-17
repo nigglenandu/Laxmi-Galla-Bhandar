@@ -15,15 +15,14 @@ public record CustomerDeletedEvent(
         String correlationId          // Keep for tracing
 ) {
 
-    public static CustomerDeletedEvent of(String customerId, String deletedBy, String reason) {
-        return new CustomerDeletedEvent(
-                customerId,
-                deletedBy,
-                reason,
-                Instant.now(),
-                null
-        );
+    public static CustomerDeletedEvent of(
+            String customerId,
+            String deletedBy,
+            String reason
+    ) {
+        return of(customerId, deletedBy, reason, null);
     }
+
     /**
      * Overload for cases where correlationId is already known (e.g. from request).
      */

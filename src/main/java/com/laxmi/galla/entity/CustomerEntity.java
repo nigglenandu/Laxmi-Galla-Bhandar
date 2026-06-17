@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,6 +37,10 @@ public class CustomerEntity extends AuditableEntity<String> {
     @Builder.Default
     private AccountStatus status = AccountStatus.ACTIVE;
 
+    private String blockReason;
+    private String blockedBy;
+    private Instant blockedAt;
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "customer_category",
@@ -57,6 +62,23 @@ public class CustomerEntity extends AuditableEntity<String> {
         return this.status == AccountStatus.BLOCKED;
     }
 
+    public void block(String reason, String performedBy){
+        if(isBlocked()){
+            return;
+        }
+        ensureCanBeBlocked();
+
+        this.status = AccountStatus.BLOCKED;
+        this.blockReason = reason;
+        this.blockedBy = performedBy;
+        this.blockedAt = Instant.now();
+    }
+
+    private void ensureCanBeBlocked(){
+        if (isDeleted()) {
+            throw new IllegalStateException("Cannot block a deleted customer");
+        }
+    }
     /**
      * Domain behavior - controlled status transition.
      * Extend this with a full state machine (Spring State Machine) when complexity grows.

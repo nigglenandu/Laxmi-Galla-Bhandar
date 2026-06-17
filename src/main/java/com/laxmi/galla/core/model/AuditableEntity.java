@@ -79,6 +79,11 @@ public abstract class AuditableEntity<U> extends BaseEntity implements Serializa
      * Soft-delete this entity (only if currently active).
      */
     public void markAsDeleted(U deleter) {
+        if (isDeleted()) {
+            throw new IllegalStateException(
+                    getClass().getSimpleName() + " is already deleted"
+            );
+        }
         if (isActive()) {
             this.deletedAt = Instant.now();
             this.deletedBy = deleter;

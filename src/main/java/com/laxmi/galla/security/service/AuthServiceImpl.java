@@ -81,7 +81,7 @@ public class AuthServiceImpl implements IAuthService {
                     .lastName(signupRequest.lastName())
                     .email(email)
                     .password(encodedPassword)
-                    .active(true)
+                    .accountLocked(true)
                     .emailVerified(false)
                     .roles(new HashSet<>())
                     .build();

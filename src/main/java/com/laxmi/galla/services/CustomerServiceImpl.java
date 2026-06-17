@@ -7,7 +7,7 @@ import com.laxmi.galla.core.pagination.PageResponseFactory;
 import com.laxmi.galla.core.pagination.PaginationPolicy;
 import com.laxmi.galla.core.security.context.AuthContext;
 import com.laxmi.galla.dto.CustomerSearchCriteria;
-import com.laxmi.galla.customer.event.CustomerUpdatedEvent;
+import com.laxmi.galla.customer.CustomerUpdatedEvent;
 import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.dto.request.CustomerRequestDto;
 import com.laxmi.galla.dto.response.CustomerResponseDto;
