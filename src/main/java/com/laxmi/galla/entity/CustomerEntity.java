@@ -41,6 +41,10 @@ public class CustomerEntity extends AuditableEntity<String> {
     private String blockedBy;
     private Instant blockedAt;
 
+    private String deactivatedReason;
+    private String deactivatedBy;
+    private Instant deactivatedAt;
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "customer_category",
@@ -78,6 +82,50 @@ public class CustomerEntity extends AuditableEntity<String> {
         if (isDeleted()) {
             throw new IllegalStateException("Cannot block a deleted customer");
         }
+    }
+
+    // Inside CustomerEntity.java
+
+    /**
+     * Atomic domain operation: Deactivate this customer
+     */
+    public void deactivate(String reason, String performedBy) {
+        if (isDeleted()) {
+            throw new IllegalStateException("Cannot deactivate a deleted customer");
+        }
+
+        if (this.status == AccountStatus.INACTIVE) {
+            throw new IllegalStateException("Customer is already deactivated");
+        }
+
+        this.status = AccountStatus.INACTIVE;
+        // Optional audit fields (highly recommended for enterprise traceability)
+         this.deactivatedReason = reason;
+         this.deactivatedBy = performedBy;
+         this.deactivatedAt = Instant.now();
+    }
+
+    public void activate(String reason, String performedBy) {
+
+        if (isDeleted()) {
+            throw new IllegalStateException(
+                    "Cannot activate a deleted customer"
+            );
+        }
+
+        if (this.status == AccountStatus.BLOCKED) {
+            throw new IllegalStateException(
+                    "Blocked customer must be restored first"
+            );
+        }
+
+        if (this.status == AccountStatus.ACTIVE) {
+            throw new IllegalStateException(
+                    "Customer is already active"
+            );
+        }
+
+        this.status = AccountStatus.ACTIVE;
     }
     /**
      * Domain behavior - controlled status transition.
