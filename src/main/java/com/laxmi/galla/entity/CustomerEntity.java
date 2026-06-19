@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,6 +37,14 @@ public class CustomerEntity extends AuditableEntity<String> {
     @Builder.Default
     private AccountStatus status = AccountStatus.ACTIVE;
 
+    private String blockReason;
+    private String blockedBy;
+    private Instant blockedAt;
+
+    private String deactivatedReason;
+    private String deactivatedBy;
+    private Instant deactivatedAt;
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "customer_category",
@@ -57,6 +66,67 @@ public class CustomerEntity extends AuditableEntity<String> {
         return this.status == AccountStatus.BLOCKED;
     }
 
+    public void block(String reason, String performedBy){
+        if(isBlocked()){
+            return;
+        }
+        ensureCanBeBlocked();
+
+        this.status = AccountStatus.BLOCKED;
+        this.blockReason = reason;
+        this.blockedBy = performedBy;
+        this.blockedAt = Instant.now();
+    }
+
+    private void ensureCanBeBlocked(){
+        if (isDeleted()) {
+            throw new IllegalStateException("Cannot block a deleted customer");
+        }
+    }
+
+    // Inside CustomerEntity.java
+
+    /**
+     * Atomic domain operation: Deactivate this customer
+     */
+    public void deactivate(String reason, String performedBy) {
+        if (isDeleted()) {
+            throw new IllegalStateException("Cannot deactivate a deleted customer");
+        }
+
+        if (this.status == AccountStatus.INACTIVE) {
+            throw new IllegalStateException("Customer is already deactivated");
+        }
+
+        this.status = AccountStatus.INACTIVE;
+        // Optional audit fields (highly recommended for enterprise traceability)
+         this.deactivatedReason = reason;
+         this.deactivatedBy = performedBy;
+         this.deactivatedAt = Instant.now();
+    }
+
+    public void activate(String reason, String performedBy) {
+
+        if (isDeleted()) {
+            throw new IllegalStateException(
+                    "Cannot activate a deleted customer"
+            );
+        }
+
+        if (this.status == AccountStatus.BLOCKED) {
+            throw new IllegalStateException(
+                    "Blocked customer must be restored first"
+            );
+        }
+
+        if (this.status == AccountStatus.ACTIVE) {
+            throw new IllegalStateException(
+                    "Customer is already active"
+            );
+        }
+
+        this.status = AccountStatus.ACTIVE;
+    }
     /**
      * Domain behavior - controlled status transition.
      * Extend this with a full state machine (Spring State Machine) when complexity grows.
