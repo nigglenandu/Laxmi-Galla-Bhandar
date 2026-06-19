@@ -66,8 +66,8 @@ public class CustomerEntity extends AuditableEntity<String> {
         return this.status == AccountStatus.BLOCKED;
     }
 
-    public void block(String reason, String performedBy){
-        if(isBlocked()){
+    public void block(String reason, String performedBy) {
+        if (isBlocked()) {
             return;
         }
         ensureCanBeBlocked();
@@ -78,7 +78,7 @@ public class CustomerEntity extends AuditableEntity<String> {
         this.blockedAt = Instant.now();
     }
 
-    private void ensureCanBeBlocked(){
+    private void ensureCanBeBlocked() {
         if (isDeleted()) {
             throw new IllegalStateException("Cannot block a deleted customer");
         }
@@ -100,9 +100,9 @@ public class CustomerEntity extends AuditableEntity<String> {
 
         this.status = AccountStatus.INACTIVE;
         // Optional audit fields (highly recommended for enterprise traceability)
-         this.deactivatedReason = reason;
-         this.deactivatedBy = performedBy;
-         this.deactivatedAt = Instant.now();
+        this.deactivatedReason = reason;
+        this.deactivatedBy = performedBy;
+        this.deactivatedAt = Instant.now();
     }
 
     public void activate(String reason, String performedBy) {
@@ -123,6 +123,21 @@ public class CustomerEntity extends AuditableEntity<String> {
             throw new IllegalStateException(
                     "Customer is already active"
             );
+        }
+
+        this.status = AccountStatus.ACTIVE;
+    }
+
+    public void restore(String reason, String performedBy) {
+
+        if (!isDeleted() && status != AccountStatus.BLOCKED) {
+            throw new IllegalStateException(
+                    "Customer cannot be restored"
+            );
+        }
+
+        if (isDeleted()) {
+            super.restore();
         }
 
         this.status = AccountStatus.ACTIVE;

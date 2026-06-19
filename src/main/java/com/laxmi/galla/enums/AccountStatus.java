@@ -10,11 +10,10 @@ public enum AccountStatus {
 //AccountActionHandler.java
 //
 //DeleteCustomerBlockCustomerHandler.java
-////DeactivateCustomerHandler.java
-////ActivateCustomerHandler.java
-////RestoreCustomerHandler.java
-////
-////AccountActionDispatcher.java
-////
-////CustomerStatusChangedEvent.javaHandler.java
+//DeactivateCustomerHandler.java
+//ActivateCustomerHandler.java
+//RestoreCustomerHandler.java
 //
+//AccountActionDispatcher.java
+//
+//CustomerStatusChangedEvent.javaHandler.java
