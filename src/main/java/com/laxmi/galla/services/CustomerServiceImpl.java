@@ -6,6 +6,7 @@ import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseFactory;
 import com.laxmi.galla.core.pagination.PaginationPolicy;
 import com.laxmi.galla.core.security.context.AuthContext;
+import com.laxmi.galla.customer.delete.AccountActionDispatcher;
 import com.laxmi.galla.dto.CustomerSearchCriteria;
 import com.laxmi.galla.customer.CustomerUpdatedEvent;
 import com.laxmi.galla.dto.PaginatedResponse;
@@ -13,6 +14,7 @@ import com.laxmi.galla.dto.request.CustomerRequestDto;
 import com.laxmi.galla.dto.response.CustomerResponseDto;
 import com.laxmi.galla.entity.Category;
 import com.laxmi.galla.entity.CustomerEntity;
+import com.laxmi.galla.enums.AccountAction;
 import com.laxmi.galla.mapper.CustomerMapper;
 import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.repository.CustomerRepository;
@@ -38,6 +40,7 @@ public class CustomerServiceImpl implements ICustomerService {
     private final AuthContext authContext;
     private final PaginationPolicy paginationPolicy;
     private final ApplicationEventPublisher eventPublisher;
+    private final AccountActionDispatcher accountActionDispatcher;
 
     @Override
     public CustomerResponseDto createCustomer(CustomerRequestDto dto) {
@@ -154,13 +157,32 @@ public class CustomerServiceImpl implements ICustomerService {
     }
 
 
-    @Override
-    public boolean deleteCustomer(Long id) {
-        return customerRepository.findById(id)
-                .map(customer -> {
-                    customerRepository.delete(customer);
-                    return true;
-                }).orElse(false);
+//    @Override
+//    public boolean deleteCustomer(Long id) {
+//        return customerRepository.findById(id)
+//                .map(customer -> {
+//                    customerRepository.delete(customer);
+//                    return true;
+//                }).orElse(false);
+//    }
+
+    @Transactional
+    public boolean deleteCustomer(Long id, String performedBy, String reason){
+        CustomerEntity customer = getCustomerOrThrow(id);
+
+        if (customer.isDeleted()) {
+            throw new IllegalStateException("Customer already deleted");
+        }
+
+       accountActionDispatcher.dispatch(
+               AccountAction.DELETE,
+               customer,
+               reason,
+               performedBy
+       );
+
+       customerRepository.save(customer);
+       return true;
     }
 
     // 2. Use this service method
