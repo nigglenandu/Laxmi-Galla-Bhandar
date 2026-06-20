@@ -6,15 +6,13 @@ import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseFactory;
 import com.laxmi.galla.core.pagination.PaginationPolicy;
 import com.laxmi.galla.core.security.context.AuthContext;
-import com.laxmi.galla.customer.delete.AccountActionDispatcher;
 import com.laxmi.galla.dto.CustomerSearchCriteria;
-import com.laxmi.galla.customer.CustomerUpdatedEvent;
+import com.laxmi.galla.customer.event.CustomerUpdatedEvent;
 import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.dto.request.CustomerRequestDto;
 import com.laxmi.galla.dto.response.CustomerResponseDto;
 import com.laxmi.galla.entity.Category;
 import com.laxmi.galla.entity.CustomerEntity;
-import com.laxmi.galla.enums.AccountAction;
 import com.laxmi.galla.mapper.CustomerMapper;
 import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.repository.CustomerRepository;
@@ -40,7 +38,6 @@ public class CustomerServiceImpl implements ICustomerService {
     private final AuthContext authContext;
     private final PaginationPolicy paginationPolicy;
     private final ApplicationEventPublisher eventPublisher;
-    private final AccountActionDispatcher accountActionDispatcher;
 
     @Override
     public CustomerResponseDto createCustomer(CustomerRequestDto dto) {
@@ -157,6 +154,41 @@ public class CustomerServiceImpl implements ICustomerService {
     }
 
 
+    @Override
+    @Transactional
+    public void performAccountAction(Long customerId,
+                                     AccountAction action,
+                                     String reason) {
+
+        CustomerEntity customer = getCustomerOrThrow(customerId);
+
+        String performedBy = authContext.getUsername();
+
+        validateAction(customer, action);
+
+        accountActionDispatcher.execute(
+                customer,
+                action,
+                reason,
+                performedBy
+        );
+
+        // No save needed (Hibernate dirty checking handles it)
+    }
+
+    private void validateAction(CustomerEntity customer, AccountAction action) {
+
+        if (customer.isDeleted() && action != AccountAction.RESTORE) {
+            throw new IllegalStateException(
+                    "Only RESTORE is allowed for deleted customers"
+            );
+        }
+
+        if (customer.isBlocked() && action == AccountAction.DELETE) {
+            throw new IllegalStateException(
+                    "Blocked customer cannot be deleted directly"
+            );
+        }
 //    @Override
 //    public boolean deleteCustomer(Long id) {
 //        return customerRepository.findById(id)
