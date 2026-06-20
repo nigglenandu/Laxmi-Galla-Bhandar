@@ -127,31 +127,4 @@ public class CustomerEntity extends AuditableEntity<String> {
 
         this.status = AccountStatus.ACTIVE;
     }
-    /**
-     * Domain behavior - controlled status transition.
-     * Extend this with a full state machine (Spring State Machine) when complexity grows.
-     */
-//    public void changeStatus(AccountStatus newStatus) {
-//        if (this.status == AccountStatus.DELETED) {
-//            throw new IllegalStateException("Cannot modify status of a deleted customer");
-//        }
-//        // Add business rules here (e.g., BLOCKED → only by compliance role, etc.)
-//        this.status = newStatus;
-//    }
-
-    /**
-     * Explicit soft delete method (consistent with @SQLDelete).
-     */
-//    public void softDelete() {
-//        this.status = AccountStatus.DELETED;
-//    }
-
-    /**
-     * Convenience methods for common status checks.
-     */
-//    public boolean isActive() {
-//        return this.status == AccountStatus.ACTIVE;
-//    }
-
-
 }

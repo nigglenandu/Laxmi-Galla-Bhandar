@@ -13,6 +13,7 @@ import com.laxmi.galla.dto.request.CustomerRequestDto;
 import com.laxmi.galla.dto.response.CustomerResponseDto;
 import com.laxmi.galla.entity.Category;
 import com.laxmi.galla.entity.CustomerEntity;
+import com.laxmi.galla.enums.AccountAction;
 import com.laxmi.galla.mapper.CustomerMapper;
 import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.repository.CustomerRepository;
@@ -38,6 +39,7 @@ public class CustomerServiceImpl implements ICustomerService {
     private final AuthContext authContext;
     private final PaginationPolicy paginationPolicy;
     private final ApplicationEventPublisher eventPublisher;
+    private final
 
     @Override
     public CustomerResponseDto createCustomer(CustomerRequestDto dto) {
@@ -155,12 +157,40 @@ public class CustomerServiceImpl implements ICustomerService {
 
 
     @Override
-    public boolean deleteCustomer(Long id) {
-        return customerRepository.findById(id)
-                .map(customer -> {
-                    customerRepository.delete(customer);
-                    return true;
-                }).orElse(false);
+    @Transactional
+    public void performAccountAction(Long customerId,
+                                     AccountAction action,
+                                     String reason) {
+
+        CustomerEntity customer = getCustomerOrThrow(customerId);
+
+        String performedBy = authContext.getUsername();
+
+        validateAction(customer, action);
+
+        accountActionDispatcher.execute(
+                customer,
+                action,
+                reason,
+                performedBy
+        );
+
+        // No save needed (Hibernate dirty checking handles it)
+    }
+
+    private void validateAction(CustomerEntity customer, AccountAction action) {
+
+        if (customer.isDeleted() && action != AccountAction.RESTORE) {
+            throw new IllegalStateException(
+                    "Only RESTORE is allowed for deleted customers"
+            );
+        }
+
+        if (customer.isBlocked() && action == AccountAction.DELETE) {
+            throw new IllegalStateException(
+                    "Blocked customer cannot be deleted directly"
+            );
+        }
     }
 
     // 2. Use this service method

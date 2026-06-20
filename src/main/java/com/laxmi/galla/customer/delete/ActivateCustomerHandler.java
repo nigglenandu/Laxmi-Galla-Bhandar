@@ -29,7 +29,7 @@ public class ActivateCustomerHandler implements AccountActionHandler {
         customer.activate(finalReason, performedBy);
 
         eventPublisher.publishEvent(
-                CustomerActivaedEvent.of(customer.getId().toString(),
+                CustomerActivatedEvent.of(customer.getId().toString(),
                         performedBy,
                         finalReason)
         );
