@@ -14,38 +14,28 @@ public class AccountActionDispatcher {
 
     private final Map<AccountAction, AccountActionHandler> handlers;
 
-    public AccountActionDispatcher(List<AccountActionHandler> handlers) {
-
-        this.handlers = handlers.stream()
+    public AccountActionDispatcher(List<AccountActionHandler> handlerList) {
+        this.handlers = handlerList.stream()
                 .collect(Collectors.toMap(
                         AccountActionHandler::supports,
                         Function.identity(),
-                        (existing, duplicate) -> {
+                        (a, b) -> {
                             throw new IllegalStateException(
-                                    "Duplicate handler found for action: "
-                                            + existing.supports()
+                                    "Duplicate handler for: " + a.supports()
                             );
                         }
                 ));
     }
 
-    public void dispatch(
-            AccountAction action,
-            CustomerEntity customer,
-            String reason,
-            String performedBy
-    ) {
-
-        if (action == null) {
-            throw new IllegalArgumentException("AccountAction cannot be null");
-        }
+    public void dispatch(AccountAction action,
+                         CustomerEntity customer,
+                         String reason,
+                         String performedBy) {
 
         AccountActionHandler handler = handlers.get(action);
 
         if (handler == null) {
-            throw new IllegalArgumentException(
-                    "No handler registered for action: " + action
-            );
+            throw new IllegalStateException("No handler for: " + action);
         }
 
         handler.handle(customer, reason, performedBy);

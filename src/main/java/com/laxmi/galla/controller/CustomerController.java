@@ -5,6 +5,7 @@ import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseAssembler;
 import com.laxmi.galla.dto.CustomerSearchCriteria;
 import com.laxmi.galla.dto.PaginatedResponse;
+import com.laxmi.galla.dto.request.CustomerActionRequest;
 import com.laxmi.galla.dto.request.CustomerRequestDto;
 import com.laxmi.galla.dto.response.CustomerResponseDto;
 import com.laxmi.galla.services.ICustomerService;
@@ -81,28 +82,22 @@ public class CustomerController {
                 .build();
     }
 
-//    @GetMapping("/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public ApiResult<UserResponseDto> getUserById(@PathVariable Long id) {
-//        return ApiResult.ok(userService.getUserById(id));
-//    }
+    @PostMapping("/{customerId}/actions")
+    public ApiResult<Void> performAction(
+            @PathVariable Long customerId,
+            @Valid @RequestBody CustomerActionRequest request
+    ) {
 
-    // Update customer
-//    @PutMapping("/{id}")
-//    public ResponseEntity<CustomerResponseDto> updateCustomer(
-//            @PathVariable Long id,
-//            @RequestBody CustomerRequestDto dto
-//    ) {
-//        return customerService.updateCustomer(id, dto)
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.notFound().build());
-//    }
+        customerService.performAccountAction(
+                customerId,
+                request.action(),
+                request.reason()
+        );
 
-    // Delete customer
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
-        boolean deleted = customerService.deleteCustomer(id);
-        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        return ApiResult.ok(null)
+                .toBuilder()
+                .message("Action completed successfully")
+                .build();
     }
 
     // Paginated customers

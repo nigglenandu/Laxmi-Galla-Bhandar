@@ -6,14 +6,17 @@ import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseFactory;
 import com.laxmi.galla.core.pagination.PaginationPolicy;
 import com.laxmi.galla.core.security.context.AuthContext;
+import com.laxmi.galla.customer.CustomerUpdatedEvent;
+import com.laxmi.galla.customer.delete.AccountActionDispatcher;
 import com.laxmi.galla.dto.CustomerSearchCriteria;
-import com.laxmi.galla.customer.event.CustomerUpdatedEvent;
 import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.dto.request.CustomerRequestDto;
 import com.laxmi.galla.dto.response.CustomerResponseDto;
 import com.laxmi.galla.entity.Category;
 import com.laxmi.galla.entity.CustomerEntity;
+import com.laxmi.galla.enums.AccountAction;
 import com.laxmi.galla.mapper.CustomerMapper;
+import com.laxmi.galla.policy.AccountActionPolicy;
 import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.repository.CustomerRepository;
 import com.laxmi.galla.specification.CustomerSpecification;
@@ -38,6 +41,8 @@ public class CustomerServiceImpl implements ICustomerService {
     private final AuthContext authContext;
     private final PaginationPolicy paginationPolicy;
     private final ApplicationEventPublisher eventPublisher;
+    private final AccountActionDispatcher dispatcher;
+    private final AccountActionPolicy policy;
 
     @Override
     public CustomerResponseDto createCustomer(CustomerRequestDto dto) {
@@ -116,10 +121,10 @@ public class CustomerServiceImpl implements ICustomerService {
         return customerMapper.toCustomerResponseDto(updated);
     }
 
-    private void applyUpdate(CustomerEntity customer, CustomerRequestDto dto){
+    private void applyUpdate(CustomerEntity customer, CustomerRequestDto dto) {
         validatePanUniqueness(customer, dto);
         customerMapper.updateCustomer(dto, customer);
-        if(dto.categoryIds() != null){
+        if (dto.categoryIds() != null) {
             Set<Category> categories = fetchCategoryEntitiesByIds(dto.categoryIds());
             customer.setCategories(categories);
         }
@@ -155,25 +160,26 @@ public class CustomerServiceImpl implements ICustomerService {
 
 
     @Override
-    @Transactional
     public void performAccountAction(Long customerId,
                                      AccountAction action,
                                      String reason) {
 
         CustomerEntity customer = getCustomerOrThrow(customerId);
 
-        String performedBy = authContext.getUsername();
+        String performedBy = authContext.getEmail();
 
-        validateAction(customer, action);
+        // STEP 1: VALIDATION (CENTRAL POLICY)
+        policy.validate(customer, action);
 
-        accountActionDispatcher.execute(
-                customer,
+        // STEP 2: DISPATCH TO HANDLER
+        dispatcher.dispatch(
                 action,
+                customer,
                 reason,
                 performedBy
         );
 
-        // No save needed (Hibernate dirty checking handles it)
+        // NO SAVE REQUIRED (Hibernate dirty checking)
     }
 
     private void validateAction(CustomerEntity customer, AccountAction action) {
@@ -189,32 +195,6 @@ public class CustomerServiceImpl implements ICustomerService {
                     "Blocked customer cannot be deleted directly"
             );
         }
-//    @Override
-//    public boolean deleteCustomer(Long id) {
-//        return customerRepository.findById(id)
-//                .map(customer -> {
-//                    customerRepository.delete(customer);
-//                    return true;
-//                }).orElse(false);
-//    }
-
-    @Transactional
-    public boolean deleteCustomer(Long id, String performedBy, String reason){
-        CustomerEntity customer = getCustomerOrThrow(id);
-
-        if (customer.isDeleted()) {
-            throw new IllegalStateException("Customer already deleted");
-        }
-
-       accountActionDispatcher.dispatch(
-               AccountAction.DELETE,
-               customer,
-               reason,
-               performedBy
-       );
-
-       customerRepository.save(customer);
-       return true;
     }
 
     // 2. Use this service method
