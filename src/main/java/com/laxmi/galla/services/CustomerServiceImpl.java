@@ -10,6 +10,7 @@ import com.laxmi.galla.customer.CustomerUpdatedEvent;
 import com.laxmi.galla.customer.delete.AccountActionDispatcher;
 import com.laxmi.galla.dto.CustomerSearchCriteria;
 import com.laxmi.galla.dto.PaginatedResponse;
+import com.laxmi.galla.dto.RequestContext;
 import com.laxmi.galla.dto.request.CustomerRequestDto;
 import com.laxmi.galla.dto.response.CustomerResponseDto;
 import com.laxmi.galla.entity.Category;
@@ -17,6 +18,8 @@ import com.laxmi.galla.entity.CustomerEntity;
 import com.laxmi.galla.enums.AccountAction;
 import com.laxmi.galla.mapper.CustomerMapper;
 import com.laxmi.galla.policy.AccountActionPolicy;
+import com.laxmi.galla.policy.AccountActionSecurityPolicy;
+import com.laxmi.galla.policy.RequestContextBuilder;
 import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.repository.CustomerRepository;
 import com.laxmi.galla.specification.CustomerSpecification;
@@ -43,6 +46,8 @@ public class CustomerServiceImpl implements ICustomerService {
     private final ApplicationEventPublisher eventPublisher;
     private final AccountActionDispatcher dispatcher;
     private final AccountActionPolicy policy;
+    private final AccountActionSecurityPolicy  securityPolicy;
+    private final RequestContextBuilder requestContextBuilder;
 
     @Override
     public CustomerResponseDto createCustomer(CustomerRequestDto dto) {
@@ -166,7 +171,10 @@ public class CustomerServiceImpl implements ICustomerService {
 
         CustomerEntity customer = getCustomerOrThrow(customerId);
 
-        String performedBy = authContext.getEmail();
+        RequestContext ctx = requestContextBuilder.build(customer);
+
+        // STEP 1: SECURITY
+        securityPolicy.validate(action, ctx.role(), ctx.isSelfAction());
 
         // STEP 1: VALIDATION (CENTRAL POLICY)
         policy.validate(customer, action);
@@ -176,7 +184,7 @@ public class CustomerServiceImpl implements ICustomerService {
                 action,
                 customer,
                 reason,
-                performedBy
+                ctx.email()
         );
 
         // NO SAVE REQUIRED (Hibernate dirty checking)
