@@ -1,6 +1,7 @@
 package com.laxmi.galla.entity;
 
 import com.laxmi.galla.core.model.AuditableEntity;
+import com.laxmi.galla.customer.domain.entity.CustomerEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;

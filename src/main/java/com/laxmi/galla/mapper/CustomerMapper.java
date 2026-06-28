@@ -1,8 +1,8 @@
 package com.laxmi.galla.mapper;
 
-import com.laxmi.galla.dto.*;
-import com.laxmi.galla.dto.request.CustomerRequestDto;
-import com.laxmi.galla.dto.response.CustomerResponseDto;
+import com.laxmi.galla.customer.domain.entity.CustomerEntity;
+import com.laxmi.galla.customer.dto.request.CustomerRequestDto;
+import com.laxmi.galla.customer.dto.response.CustomerResponseDto;
 import com.laxmi.galla.entity.*;
 import org.mapstruct.*;
 

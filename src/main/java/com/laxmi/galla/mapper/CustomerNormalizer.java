@@ -1,7 +1,6 @@
 package com.laxmi.galla.mapper;
 
-import com.laxmi.galla.dto.request.CustomerRequestDto;
-import com.laxmi.galla.entity.CustomerEntity;
+import com.laxmi.galla.customer.domain.entity.CustomerEntity;
 import org.springframework.stereotype.Component;
 
 @Component

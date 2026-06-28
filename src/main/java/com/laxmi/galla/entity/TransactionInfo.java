@@ -1,6 +1,8 @@
 package com.laxmi.galla.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.laxmi.galla.company.domain.entity.Company;
+import com.laxmi.galla.customer.domain.entity.CustomerEntity;
 import com.laxmi.galla.enums.PurchaseOrSale;
 import com.laxmi.galla.core.model.AuditableEntity;
 import jakarta.persistence.*;
