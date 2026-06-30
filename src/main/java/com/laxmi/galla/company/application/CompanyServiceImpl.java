@@ -1,6 +1,6 @@
-package com.laxmi.galla.services;
+package com.laxmi.galla.company.application;
 
-import com.laxmi.galla.dto.request.CompanyRequestDto;
+import com.laxmi.galla.company.dto.request.CompanyRequestDto;
 import com.laxmi.galla.company.dto.response.CompanyResponseDto;
 import com.laxmi.galla.company.domain.entity.Company;
 import com.laxmi.galla.mapper.CompanyMapper;
@@ -23,7 +23,7 @@ public class CompanyServiceImpl implements ICompanyService {
     }
 
     @Override
-    public CompanyResponseDto createCustomer(CompanyRequestDto dto) {
+    public CompanyResponseDto createCompany(CompanyRequestDto dto) {
         Company company = companyMapper.toCompanyEntity(dto);
         Company saved = companyRepository.save(company);
         return companyMapper.toCompanyResponseDto(saved);

@@ -1,17 +1,24 @@
 package com.laxmi.galla.controller;
 
 import com.laxmi.galla.company.application.ICompanyService;
+import com.laxmi.galla.company.dto.request.CompanyRequestDto;
+import com.laxmi.galla.company.dto.request.CompanySearchCriteria;
 import com.laxmi.galla.core.dto.response.ApiResult;
+import com.laxmi.galla.core.pagination.PageResponse;
+import com.laxmi.galla.core.pagination.PageResponseAssembler;
 import com.laxmi.galla.customer.dto.response.CustomerResponseDto;
-import com.laxmi.galla.dto.request.CompanyRequestDto;
 import com.laxmi.galla.company.dto.response.CompanyResponseDto;
+import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/company")
 public class CompanyController {
 
@@ -19,13 +26,21 @@ public class CompanyController {
 
     @PostMapping
     public ApiResult<CompanyResponseDto> createCompany(@RequestBody CompanyRequestDto dto) {
-        CustomerResponseDto response = companyService.createCustomer(dto);
-        return ApiResult.created(response).toBuilder().message("Customer creation completed").build();
+        CompanyResponseDto response = companyService.createCompany(dto);
+        return ApiResult.created(response).toBuilder().message("Company creation completed").build();
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<CompanyResponseDto>> getAllCompanies() {
-        return ResponseEntity.ok(companyService.getAllCustomers());
+    @GetMapping
+    public ResponseEntity<List<CompanyResponseDto>> getAllCompanies(
+            @ParameterObject Pageable pageable,
+            @ModelAttribute CompanySearchCriteria criteria
+            ) {
+        PageResponse<CompanyResponseDto> pageResponse = companyService.getAllCompanies(criteria);
+        PageResponse<CompanyResponseDto> enriched = PageResponseAssembler.of(pageResponse)
+                .withLinks("/api/v1/companies")
+                .withMetadata("criteria", criteria)
+                .assemble();
+        return ApiResult.ok(enriched);
     }
 
     @GetMapping("/{id}")

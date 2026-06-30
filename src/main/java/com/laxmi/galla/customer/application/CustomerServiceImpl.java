@@ -22,7 +22,7 @@ import com.laxmi.galla.customer.domain.policy.AccountActionSecurityPolicy;
 import com.laxmi.galla.customer.internal.builder.RequestContextBuilder;
 import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.customer.repository.CustomerRepository;
-import com.laxmi.galla.specification.CustomerSpecification;
+import com.laxmi.galla.customer.specification.CompanySpecification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -63,7 +63,7 @@ public class CustomerServiceImpl implements ICustomerService {
 
         Pageable safePageable = paginationPolicy.apply(pageable);
 
-        Specification<CustomerEntity> spec = CustomerSpecification.withCriteria(criteria);
+        Specification<CustomerEntity> spec = CompanySpecification.withCriteria(criteria);
 
         Page<CustomerEntity> page = customerRepository.findAll(spec, safePageable);
 

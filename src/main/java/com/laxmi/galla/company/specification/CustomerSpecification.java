@@ -1,8 +1,8 @@
-package com.laxmi.galla.specification;
+package com.laxmi.galla.company.specification;
 
 import com.laxmi.galla.core.specification.BaseSpecification;
-import com.laxmi.galla.customer.dto.request.CustomerSearchCriteria;
 import com.laxmi.galla.customer.domain.entity.CustomerEntity;
+import com.laxmi.galla.customer.dto.request.CustomerSearchCriteria;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
