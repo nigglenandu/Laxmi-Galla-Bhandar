@@ -1,24 +1,24 @@
 package com.laxmi.galla.company.application;
 
+import com.laxmi.galla.company.domain.event.CompanyDeletedEvent;
+import com.laxmi.galla.company.domain.event.CompanyRestoredEvent;
+import com.laxmi.galla.company.domain.event.CompanyUpdatedEvent;
 import com.laxmi.galla.company.dto.request.CompanyRequestDto;
 import com.laxmi.galla.company.dto.request.CompanySearchCriteria;
 import com.laxmi.galla.company.dto.response.CompanyResponseDto;
 import com.laxmi.galla.company.domain.entity.Company;
 import com.laxmi.galla.company.specification.CompanySpecification;
+import com.laxmi.galla.core.exception.DuplicateResourceException;
 import com.laxmi.galla.core.exception.ResourceNotFoundException;
 import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseFactory;
 import com.laxmi.galla.core.pagination.PaginationPolicy;
 import com.laxmi.galla.core.security.context.AuthContext;
-import com.laxmi.galla.Company.domain.entity.CompanyEntity;
-import com.laxmi.galla.Company.domain.event.CompanyUpdatedEvent;
-import com.laxmi.galla.customer.dto.request.CustomerRequestDto;
-import com.laxmi.galla.customer.dto.response.CustomerResponseDto;
-import com.laxmi.galla.entity.Category;
 import com.laxmi.galla.mapper.CompanyMapper;
 import com.laxmi.galla.company.respository.CompanyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -36,6 +36,7 @@ public class CompanyServiceImpl implements ICompanyService {
     private final CompanyMapper companyMapper;
     private final PaginationPolicy paginationPolicy;
     private final AuthContext authContext;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public CompanyResponseDto createCompany(CompanyRequestDto dto) {
@@ -80,40 +81,65 @@ public class CompanyServiceImpl implements ICompanyService {
 
     @Override
     @Transactional
-    public CompanyResponseDto updateMyProfile(CompanyRequestDto dto) {
+    public CompanyResponseDto updateMyCompany(CompanyRequestDto dto) {
 
-        CompanyEntity company = getCompanyOrThrow(authContext.getUserId());
+        Company company = getCompanyOrThrow(authContext.getUserId());
 
         applyUpdate(company, dto);
 
-        CompanyEntity updated = companyRepository.save(company);
+        Company updated = companyRepository.save(company);
 
         String correlationId = Optional.ofNullable(authContext.getCorrelationId()).orElse(UUID.randomUUID().toString());
 
-        eventPublisher.publishEvent(CompanyUpdatedEven.of(updated.getId().toString(), correlationId));
+        eventPublisher.publishEvent(CompanyUpdatedEvent.of(updated.getId().toString(), correlationId));
 
         return companyMapper.toCompanyResponseDto(updated);
     }
 
-    private void applyUpdate(CompanyEntity company, CompanyRequestDto dto) {
+    private void applyUpdate(Company company, CompanyRequestDto dto) {
         validatePanUniqueness(company, dto);
         companyMapper.updateCompany(dto, company);
-        if (dto.categoryIds() != null) {
-            Set<Category> categories = fetchCategoryEntitiesByIds(dto.categoryIds());
-            company.setCategories(categories);
-        }
     }
 
-
+    @Transactional
     @Override
-    public boolean deleteCustomer(Long id) {
-        return companyRepository.findById(id)
-                .map(company -> {
-                    companyRepository.delete(company);
-                    return true;
-                }).orElse(false);
+    public void deleteCompany(Long id, String reason) {
+
+        Company company = getCompanyOrThrow(id);
+
+        company.delete(authContext.getUserId().toString());
+
+        companyRepository.save(company);
+
+        eventPublisher.publishEvent(
+                CompanyDeletedEvent.of(
+                        company.getId().toString(),
+                        authContext.getEmail(),
+                        reason,
+                        authContext.getCorrelationId()
+                )
+        );
     }
 
+    @Transactional
+    @Override
+    public void restoreCompany(Long id, String reason) {
+
+        Company company = getCompanyOrThrowIncludingDeleted(id);
+
+        company.restoreCompany();
+
+        companyRepository.save(company);
+
+        eventPublisher.publishEvent(
+                CompanyRestoredEvent.of(
+                        company.getId().toString(),
+                        authContext.getEmail(),
+                        reason,
+                        authContext.getCorrelationId()
+                )
+        );
+    }
 
     private Company getCompanyOrThrow(Long id) {
 
@@ -122,20 +148,25 @@ public class CompanyServiceImpl implements ICompanyService {
                         new ResourceNotFoundException("Company", id.toString()));
     }
 
-//    // Optional: Paginated response
-//    public PaginatedResponse<CompanyResponseDto> getCompaniesPaginated(Pageable pageable) {
-//        Page<Company> page = companyRepository.findAll(pageable);
-//        List<CompanyResponseDto> content = page.getContent()
-//                .stream()
-//                .map(companyMapper::toCompanyResponseDto)
-//                .collect(Collectors.toList());
-//        return new PaginatedResponse<>(
-//                content,
-//                page.isLast(),
-//                page.getNumber(),
-//                page.getSize(),
-//                page.getTotalElements(),
-//                page.getTotalPages()
-//        );
-//    }
-}
+    private void validatePanUniqueness(Company existing, CompanyRequestDto dto) {
+
+        String newPan = dto.panNumber();
+        String oldPan = existing.getPanNumber();
+
+        if (newPan == null || newPan.equals(oldPan)) {
+            return;
+        }
+
+        boolean exists = companyRepository.existsByPanNumberAndIdNot(newPan, existing.getId());
+
+        if (exists) {
+            throw new DuplicateResourceException("Company", "panNumber", dto.panNumber());
+        }
+    }
+
+    private Company getCompanyOrThrowIncludingDeleted(Long id) {
+        return companyRepository.findByIdIncludingDeleted(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Company", id.toString()));
+
+    }

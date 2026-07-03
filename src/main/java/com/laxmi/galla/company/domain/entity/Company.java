@@ -38,4 +38,15 @@ public class Company extends AuditableEntity<String> {
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JsonManagedReference
     private Set<TransactionInfo> transactions = new HashSet<>();
+
+    public void delete(String deletedBy) {
+        markAsDeleted(deletedBy);
+    }
+
+    public void restoreCompany() {
+        if (!isDeleted()) {
+            throw new IllegalStateException("Company is not deleted.");
+        }
+        restore();
+    }
 }
