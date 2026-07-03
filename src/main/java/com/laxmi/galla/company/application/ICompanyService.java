@@ -18,10 +18,11 @@ public interface ICompanyService {
     PageResponse<CompanyResponseDto> getAllCompanies(CompanySearchCriteria criteria,
                                                      Pageable pageable);
 
+    CompanyResponseDto getCurrentCompanyProfile();
 
-    Optional<CompanyResponseDto> getCustomerById(Long id);
+    CompanyResponseDto updateCompany(Long id, CompanyRequestDto dto);
 
-    Optional<CompanyResponseDto> updateCustomer(Long id, CompanyRequestDto dto);
+    CompanyResponseDto updateMyCompany(CompanyRequestDto dto);
 
     boolean deleteCustomer(Long id);
 

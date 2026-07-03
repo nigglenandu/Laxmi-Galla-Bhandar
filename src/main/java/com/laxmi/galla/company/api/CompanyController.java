@@ -6,14 +6,14 @@ import com.laxmi.galla.company.dto.request.CompanySearchCriteria;
 import com.laxmi.galla.core.dto.response.ApiResult;
 import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseAssembler;
-import com.laxmi.galla.customer.dto.response.CustomerResponseDto;
 import com.laxmi.galla.company.dto.response.CompanyResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +35,7 @@ public class CompanyController {
             @ParameterObject Pageable pageable,
             @ModelAttribute CompanySearchCriteria criteria
             ) {
-        PageResponse<CompanyResponseDto> pageResponse = companyService.getAllCompanies(criteria);
+        PageResponse<CompanyResponseDto> pageResponse = companyService.getAllCompanies(criteria, pageable);
         PageResponse<CompanyResponseDto> enriched = PageResponseAssembler.of(pageResponse)
                 .withLinks("/api/v1/companies")
                 .withMetadata("criteria", criteria)
@@ -43,24 +43,30 @@ public class CompanyController {
         return ApiResult.ok(enriched);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CompanyResponseDto> getCompanyById(@PathVariable Long id) {
-        Optional<CompanyResponseDto> companyOpt = companyService.getCustomerById(id);
-        return companyOpt.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping()
+    public ApiResult<CompanyResponseDto> getMyProfile() {
+       return ApiResult.ok(companyService.getCurrentCompanyProfile());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CompanyResponseDto> updateCompany(@PathVariable Long id,
-                                                            @RequestBody CompanyRequestDto dto) {
-        Optional<CompanyResponseDto> updatedOpt = companyService.updateCustomer(id, dto);
-        return updatedOpt.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ApiResult<CompanyResponseDto> updateCompany(@PathVariable Long id,
+                                                            @Valid @RequestBody CompanyRequestDto dto) {
+       CompanyResponseDto response = companyService.updateCompany(id, dto);
+       return ApiResult.ok(response)
+               .toBuilder()
+               .message("Company updated successfully")
+               .build();
+    }
+
+    @PutMapping("/me")
+    public ApiResult<CompanyResponseDto> updateMyCompany(@Valid @RequestBody CompanyRequestDto dto) {
+        CompanyResponseDto response = companyService.updateMyCompany(dto);
+        return ApiResult.ok(response).toBuilder().message("Company updated successfully").build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCompany(@PathVariable Long id) {
-        boolean deleted = companyService.deleteCustomer(id);
+        boolean deleted = companyService.deleteCompany(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 

@@ -9,6 +9,7 @@ import com.laxmi.galla.core.security.context.AuthContext;
 import com.laxmi.galla.customer.domain.event.CustomerUpdatedEvent;
 import com.laxmi.galla.customer.internal.dispatcher.AccountActionDispatcher;
 import com.laxmi.galla.customer.dto.request.CustomerSearchCriteria;
+import com.laxmi.galla.customer.specification.CustomerSpecification;
 import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.customer.dto.context.RequestContext;
 import com.laxmi.galla.customer.dto.request.CustomerRequestDto;
@@ -22,7 +23,6 @@ import com.laxmi.galla.customer.domain.policy.AccountActionSecurityPolicy;
 import com.laxmi.galla.customer.internal.builder.RequestContextBuilder;
 import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.customer.repository.CustomerRepository;
-import com.laxmi.galla.customer.specification.CompanySpecification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -63,7 +63,7 @@ public class CustomerServiceImpl implements ICustomerService {
 
         Pageable safePageable = paginationPolicy.apply(pageable);
 
-        Specification<CustomerEntity> spec = CompanySpecification.withCriteria(criteria);
+        Specification<CustomerEntity> spec = CustomerSpecification.withCriteria(criteria);
 
         Page<CustomerEntity> page = customerRepository.findAll(spec, safePageable);
 
@@ -72,7 +72,7 @@ public class CustomerServiceImpl implements ICustomerService {
 
 
     @Override
-    public CustomerResponseDto getCurrentCustomerProfile() {
+    public CustomerResponseDto  getCurrentCustomerProfile() {
 
         return customerMapper.toCustomerResponseDto(getCustomerOrThrow(authContext.getUserId()));
     }

@@ -124,13 +124,13 @@
     alter table custom_unit 
        add constraint UK2p1jyv4xnet6vro26qj0q65my unique (unit_name);
 
-    create index idx_customer_contact 
+    create index idx_customer_contact
        on customer_info (contact);
 
     alter table roles 
        add constraint UKg50w4r0ru3g9uf6i6fr4kpro8 unique (role);
 
-    create index idx_transaction_customer 
+    create index idx_transaction_customer
        on transaction_info (customer_id);
 
     create index idx_transaction_date 
@@ -148,14 +148,14 @@
     alter table verification_token 
        add constraint UKp678btf3r9yu6u8aevyb4ff0m unique (token);
 
-    alter table customer_category 
+    alter table customer_category
        add constraint FKd3y8stblsin7j38kx8xt4v8qf 
        foreign key (category_id) 
        references category (id);
 
-    alter table customer_category 
+    alter table customer_category
        add constraint FKa8r7yjsb2y5330fsgabhgfvmw 
-       foreign key (customer_id) 
+       foreign key (customer_id)
        references customer_info (id);
 
     alter table refresh_tokens 
@@ -170,7 +170,7 @@
 
     alter table report 
        add constraint FKiyljbi6sutr47ys2r2vuf5pii 
-       foreign key (customer_id) 
+       foreign key (customer_id)
        references customer_info (id);
 
     alter table transaction_info 
@@ -180,7 +180,7 @@
 
     alter table transaction_info 
        add constraint FKbjs329m1y2f8llo6sj8x659wq 
-       foreign key (customer_id) 
+       foreign key (customer_id)
        references customer_info (id);
 
     alter table transaction_info 

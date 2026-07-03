@@ -9,7 +9,7 @@ public record TransactionResponseDto(
 
         String id,
 
-        String customerName,
+        String CompanyName,
         String companyName,
 
         BigDecimal unitAmount,

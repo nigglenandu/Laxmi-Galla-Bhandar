@@ -1,4 +1,4 @@
-package com.laxmi.galla.customer.specification;
+package com.laxmi.galla.company.specification;
 
 import com.laxmi.galla.company.domain.entity.Company;
 import com.laxmi.galla.company.dto.request.CompanySearchCriteria;
