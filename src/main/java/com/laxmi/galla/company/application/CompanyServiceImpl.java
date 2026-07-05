@@ -3,11 +3,12 @@ package com.laxmi.galla.company.application;
 import com.laxmi.galla.company.domain.event.CompanyDeletedEvent;
 import com.laxmi.galla.company.domain.event.CompanyRestoredEvent;
 import com.laxmi.galla.company.domain.event.CompanyUpdatedEvent;
+import com.laxmi.galla.company.dto.request.CompanyActionRequest;
 import com.laxmi.galla.company.dto.request.CompanyRequestDto;
 import com.laxmi.galla.company.dto.request.CompanySearchCriteria;
 import com.laxmi.galla.company.dto.response.CompanyResponseDto;
 import com.laxmi.galla.company.domain.entity.Company;
-import com.laxmi.galla.company.specification.CompanySpecification;
+import com.laxmi.galla.company.domain.specification.CompanySpecification;
 import com.laxmi.galla.core.exception.DuplicateResourceException;
 import com.laxmi.galla.core.exception.ResourceNotFoundException;
 import com.laxmi.galla.core.pagination.PageResponse;
@@ -25,7 +26,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -103,7 +103,7 @@ public class CompanyServiceImpl implements ICompanyService {
 
     @Transactional
     @Override
-    public void deleteCompany(Long id, String reason) {
+    public void deleteCompany(Long id, CompanyActionRequest request) {
 
         Company company = getCompanyOrThrow(id);
 
@@ -115,7 +115,7 @@ public class CompanyServiceImpl implements ICompanyService {
                 CompanyDeletedEvent.of(
                         company.getId().toString(),
                         authContext.getEmail(),
-                        reason,
+                        request.reason(),
                         authContext.getCorrelationId()
                 )
         );
@@ -123,7 +123,7 @@ public class CompanyServiceImpl implements ICompanyService {
 
     @Transactional
     @Override
-    public void restoreCompany(Long id, String reason) {
+    public void restoreCompany(Long id, CompanyActionRequest request) {
 
         Company company = getCompanyOrThrowIncludingDeleted(id);
 
@@ -135,7 +135,7 @@ public class CompanyServiceImpl implements ICompanyService {
                 CompanyRestoredEvent.of(
                         company.getId().toString(),
                         authContext.getEmail(),
-                        reason,
+                        request.reason(),
                         authContext.getCorrelationId()
                 )
         );
@@ -170,3 +170,4 @@ public class CompanyServiceImpl implements ICompanyService {
                         new ResourceNotFoundException("Company", id.toString()));
 
     }
+}

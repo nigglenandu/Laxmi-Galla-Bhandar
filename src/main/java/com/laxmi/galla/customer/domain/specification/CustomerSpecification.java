@@ -1,4 +1,4 @@
-package com.laxmi.galla.customer.specification;
+package com.laxmi.galla.customer.domain.specification;
 
 import com.laxmi.galla.core.specification.BaseSpecification;
 import com.laxmi.galla.customer.domain.entity.CustomerEntity;

@@ -1,4 +1,4 @@
-package com.laxmi.galla.services;
+package com.laxmi.galla.categories.controller.application;
 
 import com.laxmi.galla.dto.request.CategoryRequestDto;
 import com.laxmi.galla.dto.response.CategoryResponseDto;

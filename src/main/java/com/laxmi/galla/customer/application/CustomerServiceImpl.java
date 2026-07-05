@@ -9,7 +9,7 @@ import com.laxmi.galla.core.security.context.AuthContext;
 import com.laxmi.galla.customer.domain.event.CustomerUpdatedEvent;
 import com.laxmi.galla.customer.internal.dispatcher.AccountActionDispatcher;
 import com.laxmi.galla.customer.dto.request.CustomerSearchCriteria;
-import com.laxmi.galla.customer.specification.CustomerSpecification;
+import com.laxmi.galla.customer.domain.specification.CustomerSpecification;
 import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.customer.dto.context.RequestContext;
 import com.laxmi.galla.customer.dto.request.CustomerRequestDto;

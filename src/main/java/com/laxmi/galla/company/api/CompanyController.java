@@ -1,6 +1,7 @@
 package com.laxmi.galla.controller;
 
 import com.laxmi.galla.company.application.ICompanyService;
+import com.laxmi.galla.company.dto.request.CompanyActionRequest;
 import com.laxmi.galla.company.dto.request.CompanyRequestDto;
 import com.laxmi.galla.company.dto.request.CompanySearchCriteria;
 import com.laxmi.galla.core.dto.response.ApiResult;
@@ -65,9 +66,29 @@ public class CompanyController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCompany(@PathVariable Long id) {
-        boolean deleted = companyService.deleteCompany(id);
-        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    public ApiResult<Void> deleteCompany(
+            @PathVariable Long id,
+            @Valid @RequestBody CompanyActionRequest request) {
+
+        companyService.deleteCompany(id, request);
+
+        return ApiResult.noContent()
+                .toBuilder()
+                .message("Company deleted successfully")
+                .build();
+    }
+
+    @PatchMapping("/{id}/restore")
+    public ApiResult<Void> restoreCompany(
+            @PathVariable Long id,
+            @Valid @RequestBody CompanyActionRequest request) {
+
+        companyService.restoreCompany(id, request);
+
+        return ApiResult.ok(null)
+                .toBuilder()
+                .message("Company restored successfully")
+                .build();
     }
 
     // Optional: Pagination endpoint

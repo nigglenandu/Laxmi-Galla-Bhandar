@@ -1,5 +1,6 @@
 package com.laxmi.galla.company.application;
 
+import com.laxmi.galla.company.dto.request.CompanyActionRequest;
 import com.laxmi.galla.company.dto.request.CompanyRequestDto;
 import com.laxmi.galla.company.dto.request.CompanySearchCriteria;
 import com.laxmi.galla.company.dto.response.CompanyResponseDto;
@@ -24,7 +25,9 @@ public interface ICompanyService {
 
     CompanyResponseDto updateMyCompany(CompanyRequestDto dto);
 
-    boolean deleteCustomer(Long id);
+    void deleteCompany(Long id, CompanyActionRequest request);
+
+    void restoreCompany(Long id, CompanyActionRequest request);
 
 //    PaginatedResponse<CompanyResponseDto> getCompaniesPaginated(Pageable pageable);
 }

@@ -1,7 +1,7 @@
-package com.laxmi.galla.controller;
+package com.laxmi.galla.categories.controller.api;
 import com.laxmi.galla.dto.request.CategoryRequestDto;
 import com.laxmi.galla.dto.response.CategoryResponseDto;
-import com.laxmi.galla.services.ICategoryService;
+import com.laxmi.galla.categories.controller.application.ICategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
