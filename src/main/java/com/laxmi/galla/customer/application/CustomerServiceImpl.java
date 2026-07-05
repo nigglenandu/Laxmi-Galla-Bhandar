@@ -14,7 +14,6 @@ import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.customer.dto.context.RequestContext;
 import com.laxmi.galla.customer.dto.request.CustomerRequestDto;
 import com.laxmi.galla.customer.dto.response.CustomerResponseDto;
-import com.laxmi.galla.entity.Category;
 import com.laxmi.galla.customer.domain.entity.CustomerEntity;
 import com.laxmi.galla.customer.domain.enums.AccountAction;
 import com.laxmi.galla.mapper.CustomerMapper;

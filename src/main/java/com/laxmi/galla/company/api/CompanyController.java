@@ -32,7 +32,7 @@ public class CompanyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CompanyResponseDto>> getAllCompanies(
+    public ApiResult<PageResponse<CompanyResponseDto>> getAllCompanies(
             @ParameterObject Pageable pageable,
             @ModelAttribute CompanySearchCriteria criteria
             ) {
@@ -85,7 +85,7 @@ public class CompanyController {
 
         companyService.restoreCompany(id, request);
 
-        return ApiResult.ok(null)
+        return ApiResult.<Void>ok(null)
                 .toBuilder()
                 .message("Company restored successfully")
                 .build();

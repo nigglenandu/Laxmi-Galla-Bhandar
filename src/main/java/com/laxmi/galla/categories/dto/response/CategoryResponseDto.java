@@ -1,4 +1,4 @@
-package com.laxmi.galla.dto.response;
+package com.laxmi.galla.categories.dto.response;
 
 public record CategoryResponseDto(
         String name

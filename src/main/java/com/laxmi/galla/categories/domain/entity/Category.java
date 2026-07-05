@@ -1,4 +1,4 @@
-package com.laxmi.galla.entity;
+package com.laxmi.galla.categories.domain.entity;
 
 import com.laxmi.galla.core.model.AuditableEntity;
 import jakarta.persistence.Column;
@@ -26,4 +26,15 @@ public class Category extends AuditableEntity<String> {
     @Size(max = 100, message = "Category name too long")
     @Column(nullable = false, unique = true)
     private String name;
+
+    public void delete(String deletedBy) {
+        markAsDeleted(deletedBy);
+    }
+
+    public void restoreCategory() {
+        if (!isDeleted()) {
+            throw new IllegalStateException("Category is not deleted.");
+        }
+        restore();
+    }
 }
