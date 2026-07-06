@@ -1,15 +1,25 @@
 package com.laxmi.galla.transaction.dto.request;
 
-import java.time.Instant;
+import com.laxmi.galla.enums.PurchaseOrSale;
 
-public record TransactionSearchCriteria(  // Search by transaction name, PAN, or phone
-                                      String searchTerm,
+import java.time.LocalDate;
 
-                                      // Exact filters
-                                      String panNumber,
-                                      String phoneNo,
+public record TransactionSearchCriteria(
 
-                                      // Date range (AuditableEntity)
-                                      Instant createdFrom,
-                                      Instant createdTo) {
+        String searchTerm,
+
+        Long companyId,
+
+        Long customerId,
+
+        Long unitId,
+
+        PurchaseOrSale purchaseOrSale,
+
+        LocalDate fromDate,
+
+        LocalDate toDate,
+
+        Boolean hasDueOnly
+) {
 }
