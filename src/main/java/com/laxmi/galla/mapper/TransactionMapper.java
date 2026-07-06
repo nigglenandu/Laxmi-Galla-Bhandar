@@ -1,24 +1,24 @@
 package com.laxmi.galla.mapper;
 
-import com.laxmi.galla.transaction.dto.request.CompanyRequestDto;
-import com.laxmi.galla.transaction.dto.response.CompanyResponseDto;
-import com.laxmi.galla.transaction.domain.entity.Company;
+import com.laxmi.galla.transaction.domain.entity.Transaction;
+import com.laxmi.galla.transaction.dto.request.TransactionRequestDto;
+import com.laxmi.galla.transaction.dto.response.TransactionResponseDto;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
-public interface CompanyMapper {
+public interface TransactionMapper {
 
     // Request DTO -> Entity
  // default is false
 //    @Mapping(target = "transactions", ignore = true) // set manually if needed
-    Company toCompanyEntity(CompanyRequestDto dto);
+    Transaction toTransactionEntity(TransactionRequestDto dto);
 
     // Entity -> Response DTO
-    CompanyResponseDto toCompanyResponseDto(Company transaction);
+    TransactionResponseDto toTransactionResponseDto(Transaction transaction);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateCompany(CompanyRequestDto dto, @MappingTarget Company entity);
+    void updateTransaction(TransactionRequestDto dto, @MappingTarget Transaction entity);
 }

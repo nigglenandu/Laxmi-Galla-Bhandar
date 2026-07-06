@@ -1,4 +1,4 @@
-package com.laxmi.galla.dto.request;
+package com.laxmi.galla.transaction.dto.request;
 
 import com.laxmi.galla.enums.PurchaseOrSale;
 import jakarta.validation.constraints.*;

@@ -1,4 +1,4 @@
-package com.laxmi.galla.dto.response;
+package com.laxmi.galla.transaction.dto.response;
 
 import com.laxmi.galla.enums.PurchaseOrSale;
 

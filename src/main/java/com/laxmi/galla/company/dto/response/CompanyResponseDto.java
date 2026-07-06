@@ -1,6 +1,6 @@
 package com.laxmi.galla.company.dto.response;
 
-import com.laxmi.galla.dto.response.TransactionResponseDto;
+import com.laxmi.galla.transaction.dto.response.TransactionResponseDto;
 
 import java.util.Set;
 

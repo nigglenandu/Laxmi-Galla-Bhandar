@@ -1,8 +1,9 @@
-package com.laxmi.galla.entity;
+package com.laxmi.galla.transaction.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.laxmi.galla.company.domain.entity.Company;
 import com.laxmi.galla.customer.domain.entity.CustomerEntity;
+import com.laxmi.galla.entity.CustomUnit;
 import com.laxmi.galla.enums.PurchaseOrSale;
 import com.laxmi.galla.core.model.AuditableEntity;
 import jakarta.persistence.*;
@@ -14,7 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transaction_info", indexes = {
+@Table(name = "transaction", indexes = {
         @Index(name = "idx_transaction_customer", columnList = "customer_id"),
         @Index(name = "idx_transaction_date", columnList = "transaction_date")
 })
@@ -26,7 +27,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(callSuper = true)
-public class TransactionInfo extends AuditableEntity<String> {
+public class Transaction extends AuditableEntity<String> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -62,4 +63,15 @@ public class TransactionInfo extends AuditableEntity<String> {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "unit_id")
     private CustomUnit unit;
+
+    public void delete(String deletedBy) {
+        markAsDeleted(deletedBy);
+    }
+
+    public void restoreTransaction() {
+        if (!isDeleted()) {
+            throw new IllegalStateException("Transaction is not deleted.");
+        }
+        restore();
+    }
 }

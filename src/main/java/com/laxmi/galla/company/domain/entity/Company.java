@@ -2,7 +2,7 @@ package com.laxmi.galla.company.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.laxmi.galla.core.model.AuditableEntity;
-import com.laxmi.galla.entity.TransactionInfo;
+import com.laxmi.galla.transaction.domain.entity.Transaction;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -37,7 +37,7 @@ public class Company extends AuditableEntity<String> {
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JsonManagedReference
-    private Set<TransactionInfo> transactions = new HashSet<>();
+    private Set<Transaction> transactions = new HashSet<>();
 
     public void delete(String deletedBy) {
         markAsDeleted(deletedBy);
