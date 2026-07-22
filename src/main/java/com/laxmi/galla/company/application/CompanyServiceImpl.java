@@ -15,7 +15,7 @@ import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseFactory;
 import com.laxmi.galla.core.pagination.PaginationPolicy;
 import com.laxmi.galla.core.security.context.AuthContext;
-import com.laxmi.galla.mapper.CompanyMapper;
+import com.laxmi.galla.company.mapper.CompanyMapper;
 import com.laxmi.galla.company.respository.CompanyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

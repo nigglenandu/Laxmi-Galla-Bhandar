@@ -2,7 +2,7 @@ package com.laxmi.galla.security.service;
 
 import com.laxmi.galla.core.security.CustomUserDetails;
 import com.laxmi.galla.core.security.service.UserDetailsLoader;
-import com.laxmi.galla.entity.User;
+import com.laxmi.galla.domain.entity.User;
 import com.laxmi.galla.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

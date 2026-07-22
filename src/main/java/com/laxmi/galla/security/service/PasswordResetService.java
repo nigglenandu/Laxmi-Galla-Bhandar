@@ -1,8 +1,7 @@
 package com.laxmi.galla.security.service;
 
 import com.laxmi.galla.core.exception.BusinessException;
-import com.laxmi.galla.core.security.utils.HashUtils;
-import com.laxmi.galla.entity.User;
+import com.laxmi.galla.domain.entity.User;
 import com.laxmi.galla.repository.UserRepository;
 import com.laxmi.galla.security.dto.request.ChangePasswordRequest;
 import com.laxmi.galla.security.dto.request.ForgotPasswordRequest;

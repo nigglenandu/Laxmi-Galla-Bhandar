@@ -1,10 +1,9 @@
-package com.laxmi.galla.mapper;
+package com.laxmi.galla.customer.mapper;
 
 import com.laxmi.galla.categories.domain.entity.Category;
 import com.laxmi.galla.customer.domain.entity.CustomerEntity;
 import com.laxmi.galla.customer.dto.request.CustomerRequestDto;
 import com.laxmi.galla.customer.dto.response.CustomerResponseDto;
-import com.laxmi.galla.entity.*;
 import org.mapstruct.*;
 
 import java.util.List;

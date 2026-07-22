@@ -1,4 +1,4 @@
-package com.laxmi.galla.mapper;
+package com.laxmi.galla.company.mapper;
 
 import com.laxmi.galla.transaction.dto.request.CompanyRequestDto;
 import com.laxmi.galla.transaction.dto.response.CompanyResponseDto;

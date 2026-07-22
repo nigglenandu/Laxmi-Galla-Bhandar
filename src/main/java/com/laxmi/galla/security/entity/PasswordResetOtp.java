@@ -1,6 +1,6 @@
 package com.laxmi.galla.security.entity;
 
-import com.laxmi.galla.entity.User;
+import com.laxmi.galla.domain.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

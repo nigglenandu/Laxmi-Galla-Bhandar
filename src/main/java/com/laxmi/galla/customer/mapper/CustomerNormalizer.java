@@ -1,4 +1,4 @@
-package com.laxmi.galla.mapper;
+package com.laxmi.galla.customer.mapper;
 
 import com.laxmi.galla.customer.domain.entity.CustomerEntity;
 import org.springframework.stereotype.Component;
@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 public class CustomerNormalizer {
 
     public CustomerEntity normalize(CustomerEntity c) {
-        if (c.getFirstName() != null)
-            c.setFirstName(c.getFirstName().trim());
+        if (c.getUser().getFirstName() != null)
+            c.getUser().setFirstName(c.getUser().getFirstName().trim());
 
-        if (c.getLastName() != null)
-            c.setLastName(c.getLastName().trim());
+        if (c.getUser().getLastName() != null)
+            c.getUser().setLastName(c.getUser().getLastName().trim());
 
         if (c.getAddress() != null)
             c.setAddress(c.getAddress().trim());

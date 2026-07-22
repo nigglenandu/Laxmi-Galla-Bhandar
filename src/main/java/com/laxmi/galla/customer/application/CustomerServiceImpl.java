@@ -1,5 +1,6 @@
 package com.laxmi.galla.customer.application;
 
+import com.laxmi.galla.categories.domain.entity.Category;
 import com.laxmi.galla.core.exception.DuplicateResourceException;
 import com.laxmi.galla.core.exception.ResourceNotFoundException;
 import com.laxmi.galla.core.pagination.PageResponse;
@@ -10,13 +11,12 @@ import com.laxmi.galla.customer.domain.event.CustomerUpdatedEvent;
 import com.laxmi.galla.customer.internal.dispatcher.AccountActionDispatcher;
 import com.laxmi.galla.customer.dto.request.CustomerSearchCriteria;
 import com.laxmi.galla.customer.domain.specification.CustomerSpecification;
-import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.customer.dto.context.RequestContext;
 import com.laxmi.galla.customer.dto.request.CustomerRequestDto;
 import com.laxmi.galla.customer.dto.response.CustomerResponseDto;
 import com.laxmi.galla.customer.domain.entity.CustomerEntity;
 import com.laxmi.galla.customer.domain.enums.AccountAction;
-import com.laxmi.galla.mapper.CustomerMapper;
+import com.laxmi.galla.customer.mapper.CustomerMapper;
 import com.laxmi.galla.customer.domain.policy.AccountActionPolicy;
 import com.laxmi.galla.customer.domain.policy.AccountActionSecurityPolicy;
 import com.laxmi.galla.customer.internal.builder.RequestContextBuilder;
@@ -152,11 +152,6 @@ public class CustomerServiceImpl implements ICustomerService {
         dispatcher.dispatch(action, customer, reason, ctx.email());
     }
 
-    // 2. Use this service method
-    @Override
-    public PaginatedResponse<CustomerResponseDto> getCustomersPaginated(Pageable pageable) {
-        return PaginatedResponse.fromPage(customerRepository.findAll(pageable).map(customerMapper::toCustomerResponseDto));
-    }
 
     private Set<Category> fetchCategoryEntitiesByIds(Set<Long> ids) {
         if (ids == null || ids.isEmpty()) {

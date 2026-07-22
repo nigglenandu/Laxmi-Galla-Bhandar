@@ -8,7 +8,7 @@ import com.laxmi.galla.core.model.RefreshToken;
 import com.laxmi.galla.core.security.repository.RefreshTokenRepository;
 import com.laxmi.galla.core.security.service.ITokenService;
 import com.laxmi.galla.core.security.utils.HashUtils;
-import com.laxmi.galla.entity.User;
+import com.laxmi.galla.domain.entity.User;
 import com.laxmi.galla.repository.UserRepository;
 import com.laxmi.galla.security.dto.request.RefreshRequest;
 import com.laxmi.galla.security.dto.response.AuthResponse;

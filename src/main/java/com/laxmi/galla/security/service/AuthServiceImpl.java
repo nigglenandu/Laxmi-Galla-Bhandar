@@ -1,7 +1,7 @@
 package com.laxmi.galla.security.service;
 
 
-import com.laxmi.galla.entity.User;
+import com.laxmi.galla.domain.entity.User;
 import com.laxmi.galla.repository.UserRepository;
 import com.laxmi.galla.security.dto.request.LoginRequest;
 import com.laxmi.galla.security.dto.request.OtpVerifyRequest;
@@ -15,20 +15,16 @@ import com.laxmi.galla.core.dto.response.ApiResult;
 import com.laxmi.galla.core.exception.BusinessException;
 import com.laxmi.galla.core.security.repository.RoleRepository;
 import com.laxmi.galla.core.security.service.ITokenService;
-import com.laxmi.galla.core.security.utils.HashUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

@@ -2,7 +2,6 @@ package com.laxmi.galla.customer.application;
 
 import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.customer.dto.request.CustomerSearchCriteria;
-import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.customer.dto.request.CustomerRequestDto;
 import com.laxmi.galla.customer.dto.response.CustomerResponseDto;
 import com.laxmi.galla.customer.domain.enums.AccountAction;
@@ -25,7 +24,4 @@ public interface ICustomerService {
 
     void performAccountAction(Long customerId, AccountAction action, String reason);
 
-
-    // Get paginated customers as response DTOs
-    PaginatedResponse<CustomerResponseDto> getCustomersPaginated(Pageable pageable);
 }

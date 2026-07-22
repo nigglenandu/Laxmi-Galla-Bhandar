@@ -1,5 +1,6 @@
-package com.laxmi.galla.entity;
+package com.laxmi.galla.domain.entity;
 
+import com.laxmi.galla.categories.domain.entity.Category;
 import com.laxmi.galla.core.model.AuditableEntity;
 import com.laxmi.galla.customer.domain.entity.CustomerEntity;
 import jakarta.persistence.*;

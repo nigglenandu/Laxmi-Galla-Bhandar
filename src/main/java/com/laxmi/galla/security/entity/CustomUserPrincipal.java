@@ -1,6 +1,6 @@
 package com.laxmi.galla.security.entity;
 
-import com.laxmi.galla.entity.User;
+import com.laxmi.galla.domain.entity.User;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

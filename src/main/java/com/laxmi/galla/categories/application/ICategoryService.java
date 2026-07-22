@@ -1,8 +1,6 @@
 package com.laxmi.galla.categories.application;
 
-import com.laxmi.galla.categories.dto.request.CategoryActionRequest;
 import com.laxmi.galla.categories.dto.request.CategoryRequestDto;
-import com.laxmi.galla.categories.dto.request.CategorySearchCriteria;
 import com.laxmi.galla.categories.dto.response.CategoryResponseDto;
 import com.laxmi.galla.core.pagination.PageResponse;
 import org.springframework.data.domain.Pageable;

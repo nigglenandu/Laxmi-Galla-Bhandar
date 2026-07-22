@@ -4,7 +4,6 @@ import com.laxmi.galla.core.dto.response.ApiResult;
 import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseAssembler;
 import com.laxmi.galla.customer.dto.request.CustomerSearchCriteria;
-import com.laxmi.galla.dto.PaginatedResponse;
 import com.laxmi.galla.customer.dto.request.CustomerActionRequest;
 import com.laxmi.galla.customer.dto.request.CustomerRequestDto;
 import com.laxmi.galla.customer.dto.response.CustomerResponseDto;
@@ -12,7 +11,6 @@ import com.laxmi.galla.customer.application.ICustomerService;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

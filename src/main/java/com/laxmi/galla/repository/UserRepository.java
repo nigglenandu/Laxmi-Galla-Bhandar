@@ -1,6 +1,6 @@
 package com.laxmi.galla.repository;
 
-import com.laxmi.galla.entity.User;
+import com.laxmi.galla.domain.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

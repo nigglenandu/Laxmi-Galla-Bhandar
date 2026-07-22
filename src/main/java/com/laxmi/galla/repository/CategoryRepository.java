@@ -1,5 +1,6 @@
 package com.laxmi.galla.repository;
 
+import com.laxmi.galla.categories.domain.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

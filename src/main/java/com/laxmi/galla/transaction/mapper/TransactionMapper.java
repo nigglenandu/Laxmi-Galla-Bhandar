@@ -1,4 +1,4 @@
-package com.laxmi.galla.mapper;
+package com.laxmi.galla.transaction.mapper;
 
 import com.laxmi.galla.transaction.domain.entity.Transaction;
 import com.laxmi.galla.transaction.dto.request.TransactionRequestDto;

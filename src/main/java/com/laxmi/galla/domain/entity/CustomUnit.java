@@ -1,4 +1,4 @@
-package com.laxmi.galla.entity;
+package com.laxmi.galla.domain.entity;
 
 import com.laxmi.galla.core.model.AuditableEntity;
 import jakarta.persistence.Column;

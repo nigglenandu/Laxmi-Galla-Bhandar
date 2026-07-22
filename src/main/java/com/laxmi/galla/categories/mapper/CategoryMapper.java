@@ -1,4 +1,4 @@
-package com.laxmi.galla.mapper;
+package com.laxmi.galla.categories.mapper;
 
 import com.laxmi.galla.categories.domain.entity.Category;
 import com.laxmi.galla.categories.dto.request.CategoryRequestDto;

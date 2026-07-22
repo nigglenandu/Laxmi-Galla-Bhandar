@@ -1,6 +1,6 @@
 package com.laxmi.galla.transaction.dto.response;
 
-import com.laxmi.galla.enums.PurchaseOrSale;
+import com.laxmi.galla.domain.enums.PurchaseOrSale;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

@@ -9,7 +9,7 @@ import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseFactory;
 import com.laxmi.galla.core.pagination.PaginationPolicy;
 import com.laxmi.galla.core.security.context.AuthContext;
-import com.laxmi.galla.mapper.CategoryMapper;
+import com.laxmi.galla.categories.mapper.CategoryMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
