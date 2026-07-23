@@ -39,7 +39,7 @@ public class CategoryController {
         return ApiResult.ok(enriched);
     }
 
-    @GetMapping()
+    @GetMapping("/me")
     public ApiResult<CategoryResponseDto> getMyProfile() {
        return ApiResult.ok(CategoryService.getCurrentCategoryProfile());
     }

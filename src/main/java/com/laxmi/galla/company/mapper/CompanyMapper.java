@@ -1,8 +1,8 @@
 package com.laxmi.galla.company.mapper;
 
-import com.laxmi.galla.transaction.dto.request.CompanyRequestDto;
-import com.laxmi.galla.transaction.dto.response.CompanyResponseDto;
-import com.laxmi.galla.transaction.domain.entity.Company;
+import com.laxmi.galla.company.domain.entity.Company;
+import com.laxmi.galla.company.dto.request.CompanyRequestDto;
+import com.laxmi.galla.company.dto.response.CompanyResponseDto;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

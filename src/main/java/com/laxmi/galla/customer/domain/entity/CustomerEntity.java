@@ -13,9 +13,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "customer_entity", indexes = {
-        @Index(name = "idx_customer_contact", columnList = "contact")
-})
 @Getter
 @Setter
 @NoArgsConstructor

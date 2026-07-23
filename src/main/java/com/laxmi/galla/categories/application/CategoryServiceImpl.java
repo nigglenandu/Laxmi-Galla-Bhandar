@@ -3,7 +3,7 @@ package com.laxmi.galla.categories.application;
 import com.laxmi.galla.categories.domain.entity.Category;
 import com.laxmi.galla.categories.dto.request.CategoryRequestDto;
 import com.laxmi.galla.categories.dto.response.CategoryResponseDto;
-import com.laxmi.galla.categories.respository.CategoryRepository;
+import com.laxmi.galla.categories.repository.CategoryRepository;
 import com.laxmi.galla.core.exception.ResourceNotFoundException;
 import com.laxmi.galla.core.pagination.PageResponse;
 import com.laxmi.galla.core.pagination.PageResponseFactory;

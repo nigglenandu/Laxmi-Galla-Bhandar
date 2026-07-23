@@ -40,7 +40,7 @@ public class TransactionController {
         return ApiResult.ok(enriched);
     }
 
-    @GetMapping()
+    @GetMapping("/me")
     public ApiResult<TransactionResponseDto> getMyProfile() {
        return ApiResult.ok(transactionService.getCurrentTransactionProfile());
     }

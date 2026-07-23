@@ -44,7 +44,7 @@ public class CompanyController {
         return ApiResult.ok(enriched);
     }
 
-    @GetMapping()
+    @GetMapping("/me")
     public ApiResult<CompanyResponseDto> getMyProfile() {
        return ApiResult.ok(companyService.getCurrentCompanyProfile());
     }

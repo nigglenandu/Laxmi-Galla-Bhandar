@@ -39,8 +39,8 @@ public interface CustomerMapper {
 
     @AfterMapping
     default void normalize(@MappingTarget CustomerEntity entity) {
-        entity.setFirstName(trim(entity.getFirstName()));
-        entity.setLastName(trim(entity.getLastName()));
+        entity.getUser().setFirstName(trim(entity.getUser().getFirstName()));
+        entity.getUser().setLastName(trim(entity.getUser().getLastName()));
         entity.setAddress(trim(entity.getAddress()));
         entity.setPanNumber(upperTrim(entity.getPanNumber()));
     }

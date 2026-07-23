@@ -1,6 +1,7 @@
 package com.laxmi.galla.customer.application;
 
 import com.laxmi.galla.categories.domain.entity.Category;
+import com.laxmi.galla.categories.repository.CategoryRepository;
 import com.laxmi.galla.core.exception.DuplicateResourceException;
 import com.laxmi.galla.core.exception.ResourceNotFoundException;
 import com.laxmi.galla.core.pagination.PageResponse;
@@ -20,7 +21,6 @@ import com.laxmi.galla.customer.mapper.CustomerMapper;
 import com.laxmi.galla.customer.domain.policy.AccountActionPolicy;
 import com.laxmi.galla.customer.domain.policy.AccountActionSecurityPolicy;
 import com.laxmi.galla.customer.internal.builder.RequestContextBuilder;
-import com.laxmi.galla.repository.CategoryRepository;
 import com.laxmi.galla.customer.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

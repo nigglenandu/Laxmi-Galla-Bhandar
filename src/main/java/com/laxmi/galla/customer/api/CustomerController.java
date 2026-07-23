@@ -50,7 +50,7 @@ public class CustomerController {
         return ApiResult.ok(customerService.getCurrentCustomerProfile());
     }
 
-    @PutMapping("{/id}")
+    @PutMapping("/{id}")
     public ApiResult<CustomerResponseDto> updateCustomer(@PathVariable Long id, @Valid @RequestBody CustomerRequestDto dto) {
 
         CustomerResponseDto response = customerService.updateCustomer(id, dto);

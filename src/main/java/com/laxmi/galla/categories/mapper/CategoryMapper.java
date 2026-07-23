@@ -3,8 +3,6 @@ package com.laxmi.galla.categories.mapper;
 import com.laxmi.galla.categories.domain.entity.Category;
 import com.laxmi.galla.categories.dto.request.CategoryRequestDto;
 import com.laxmi.galla.categories.dto.response.CategoryResponseDto;
-import com.laxmi.galla.transaction.domain.entity.Company;
-import com.laxmi.galla.transaction.dto.request.CompanyRequestDto;
 import org.mapstruct.*;
 
 import java.util.List;
