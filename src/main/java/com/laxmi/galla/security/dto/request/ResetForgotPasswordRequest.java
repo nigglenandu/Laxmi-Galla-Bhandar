@@ -6,19 +6,42 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-//@PasswordMatch
-@Schema(description = "Reset password with OTP")
+@Schema(description = "Reset password using OTP verification")
 public record ResetForgotPasswordRequest(
+
         @NotBlank(message = "Email is required")
-        @Email String email,
+        @Email
+        @Schema(
+                description = "Registered email address",
+                example = "nigglenandu@gmail.com"
+        )
+        String email,
+
 
         @NotBlank(message = "OTP is required")
         @Size(min = 6, max = 6, message = "OTP must be 6 digits")
         @Pattern(regexp = "\\d{6}", message = "OTP must contain only digits")
+        @Schema(
+                description = "6 digit OTP received on email",
+                example = "123456"
+        )
         String otp,
 
-    @NotBlank
-//        @ValidPassword
+
+        @NotBlank
+//      @ValidPassword
+        @Schema(
+                description = "New password",
+                example = "Password@1234"
+        )
         String newPassword,
-    @NotBlank String confirmPassword
+
+
+        @NotBlank
+        @Schema(
+                description = "Confirm new password",
+                example = "Password@1234"
+        )
+        String confirmPassword
+
 ) {}

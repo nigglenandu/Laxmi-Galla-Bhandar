@@ -7,6 +7,21 @@ import jakarta.validation.constraints.Size;
 
 @Schema(description = "Login credentials")
 public record LoginRequest(
-    @NotBlank @Email String email,
-    @NotBlank @Size(min = 8) String password
+
+        @NotBlank
+        @Email
+        @Schema(
+                description = "Registered user email address",
+                example = "nigglenandu@gmail.com"
+        )
+        String email,
+
+        @NotBlank
+        @Size(min = 8)
+        @Schema(
+                description = "User password",
+                example = "Password@123"
+        )
+        String password
+
 ) {}

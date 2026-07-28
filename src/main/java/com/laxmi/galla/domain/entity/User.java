@@ -37,7 +37,7 @@ public class User extends AuditableEntity<Long> {
     String email;
 
     @Column(nullable = false, unique = true)
-    String phoneNo;
+    String phoneNumber;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -80,8 +80,8 @@ public class User extends AuditableEntity<Long> {
             email = email.trim().toLowerCase();
         }
 
-        if (phoneNo != null) {
-            phoneNo = phoneNo.trim();
+        if (phoneNumber != null) {
+            phoneNumber = phoneNumber.trim();
         }
     }
 }

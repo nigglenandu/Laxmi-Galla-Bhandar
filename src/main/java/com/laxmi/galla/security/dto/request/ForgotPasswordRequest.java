@@ -1,10 +1,18 @@
 package com.laxmi.galla.security.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-//
-//@Schema(description = "Initiate password reset")
+@Schema(description = "Initiate password reset")
 public record ForgotPasswordRequest(
-    @NotBlank @Email String email
+
+        @NotBlank
+        @Email
+        @Schema(
+                description = "Registered email address",
+                example = "nigglenandu@gmail.com"
+        )
+        String email
+
 ) {}

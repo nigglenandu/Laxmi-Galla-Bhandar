@@ -75,6 +75,7 @@ public class AuthServiceImpl implements IAuthService {
             user = User.builder()
                     .firstName(signupRequest.firstName())
                     .lastName(signupRequest.lastName())
+                    .phoneNumber(signupRequest.phoneNumber())
                     .email(email)
                     .password(encodedPassword)
                     .accountLocked(true)
